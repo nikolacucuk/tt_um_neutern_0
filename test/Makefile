@@ -2,12 +2,11 @@
 # See https://docs.cocotb.org/en/stable/quickstart.html for more info
 
 # defaults
+SIM    ?= verilator
 # Gate-level sim must use icarus: verilator is not available in the GL test
 # workflow and cannot handle sky130 primitive timing delays.
 ifeq ($(GATES),yes)
-SIM    ?= icarus
-else
-SIM    ?= verilator
+override SIM := icarus
 endif
 WAVES  ?= 0
 FST    ?= -fst # Use more efficient FST format
