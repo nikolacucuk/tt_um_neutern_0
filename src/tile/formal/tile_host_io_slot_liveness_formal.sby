@@ -22,9 +22,9 @@ arbitrary_nondet:   read_slang --top tile_host_io_slot_liveness_formal --compat-
 arbitrary_nondet:   prep -top tile_host_io_slot_liveness_formal
 
 [files]
-../../../common/packages/tile_pkg.sv
-../../../common/packages/tile_flit_types.vh
-../../../common/interfaces/rv_if.sv
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../../common/interfaces/rv_if.sv
 ../src/tile_pkg.svh
 ../src/tile_host_io.sv
 tile_host_io_slot_liveness_formal.sv

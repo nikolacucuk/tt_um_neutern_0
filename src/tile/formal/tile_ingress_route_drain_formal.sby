@@ -14,9 +14,9 @@ read_slang --top tile_ingress_route_drain_formal --compat-mode -DSYNTHESIS -DFOR
 prep -top tile_ingress_route_drain_formal
 
 [files]
-../../../common/packages/tile_pkg.sv
-../../../common/packages/tile_flit_types.vh
-../../../common/interfaces/rv_if.sv
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../../common/interfaces/rv_if.sv
 ../src/tile_pkg.svh
 ../src/tile_ingress.sv
 tile_ingress_route_drain_formal.sv

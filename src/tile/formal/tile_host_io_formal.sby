@@ -20,9 +20,9 @@ emit_one_shot:    read_slang --top tile_host_io_formal --compat-mode -DSYNTHESIS
 emit_one_shot:    prep -top tile_host_io_formal
 
 [files]
-../../../common/packages/tile_pkg.sv
-../../../common/packages/tile_flit_types.vh
-../../../common/interfaces/rv_if.sv
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../../common/interfaces/rv_if.sv
 ../src/tile_pkg.svh
 ../src/tile_host_io.sv
 tile_host_io_formal.sv

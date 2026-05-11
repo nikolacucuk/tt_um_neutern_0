@@ -32,9 +32,9 @@ enqueue_fire_requires_match:  read_slang --top tile_ingress_formal --compat-mode
 enqueue_fire_requires_match:  prep -top tile_ingress_formal
 
 [files]
-../../../common/packages/tile_pkg.sv
-../../../common/packages/tile_flit_types.vh
-../../../common/interfaces/rv_if.sv
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../../common/interfaces/rv_if.sv
 ../src/tile_pkg.svh
 ../src/tile_ingress.sv
 tile_ingress_formal.sv

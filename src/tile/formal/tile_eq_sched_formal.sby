@@ -26,32 +26,30 @@ smtbmc yices
 
 [script]
 coupled_dispatch_enqueue: plugin -i slang
-coupled_dispatch_enqueue: read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DCOUPLED_DISPATCH_ENQUEUE tile_pkg.sv rv_if.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv tile_event_queue_bank.sv tile_dispatch_scheduler.sv tile_eq_sched_formal.sv
+coupled_dispatch_enqueue: read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DCOUPLED_DISPATCH_ENQUEUE -f tile_eq_sched_formal_sources.f
 coupled_dispatch_enqueue: prep -top tile_eq_sched_formal
 
 coupled_commits_bounded:  plugin -i slang
-coupled_commits_bounded:  read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DCOUPLED_COMMITS_BOUNDED tile_pkg.sv rv_if.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv tile_event_queue_bank.sv tile_dispatch_scheduler.sv tile_eq_sched_formal.sv
+coupled_commits_bounded:  read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DCOUPLED_COMMITS_BOUNDED -f tile_eq_sched_formal_sources.f
 coupled_commits_bounded:  prep -top tile_eq_sched_formal
 
 head_data_freshness:      plugin -i slang
-head_data_freshness:      read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DHEAD_DATA_FRESHNESS tile_pkg.sv rv_if.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv tile_event_queue_bank.sv tile_dispatch_scheduler.sv tile_eq_sched_formal.sv
+head_data_freshness:      read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DHEAD_DATA_FRESHNESS -f tile_eq_sched_formal_sources.f
 head_data_freshness:      prep -top tile_eq_sched_formal
 
 refill_race_head_valid:   plugin -i slang
-refill_race_head_valid:   read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DREFILL_RACE_HEAD_VALID tile_pkg.sv rv_if.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv tile_event_queue_bank.sv tile_dispatch_scheduler.sv tile_eq_sched_formal.sv
+refill_race_head_valid:   read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DREFILL_RACE_HEAD_VALID -f tile_eq_sched_formal_sources.f
 refill_race_head_valid:   prep -top tile_eq_sched_formal
 
 count_nonzero_tracks:     plugin -i slang
-count_nonzero_tracks:     read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DCOUNT_NONZERO_TRACKS tile_pkg.sv rv_if.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv tile_event_queue_bank.sv tile_dispatch_scheduler.sv tile_eq_sched_formal.sv
+count_nonzero_tracks:     read_slang --top tile_eq_sched_formal --compat-mode -DSYNTHESIS -DFORMAL -DCOUNT_NONZERO_TRACKS -f tile_eq_sched_formal_sources.f
 count_nonzero_tracks:     prep -top tile_eq_sched_formal
 
 [files]
-../../../common/packages/tile_pkg.sv
-../../../common/packages/tile_flit_types.vh
-../../../common/interfaces/rv_if.sv
-../../../common/mem/tile_mem_1r1w_sync.sv
-../../../common/mem/coldfoot_mem_bytelane_sync.sv
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../../common/interfaces/rv_if.sv
 ../src/tile_pkg.svh
-../src/tile_event_queue_bank.sv
 ../src/tile_dispatch_scheduler.sv
 tile_eq_sched_formal.sv
+/workspaces/tt_um_neutern_0/src/tile/formal/tile_eq_sched_formal_sources.f

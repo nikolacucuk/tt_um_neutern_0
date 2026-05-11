@@ -18,11 +18,11 @@
 // │  weight[3:0]   │ neuron_y   │ neuron_x   │
 // │   4 bits       │  1 bit     │  1 bit     │
 // └────────────────┴────────────┴────────────┘
-//  Total: NEUTERN_FLIT_W = 6 bits, zero-padded to 8-bit TT wire:
-//    ui_in[7:4] = weight[3:0]
-//    ui_in[3:2] = reserved (ignored on input, driven 0 on output)
-//    ui_in[1]   = neuron_y[0]
-//    ui_in[0]   = neuron_x[0]
+//  Total: NEUTERN_FLIT_W = 6 bits, carried on 8-bit TT wire with mode bits:
+//    spike mode   (uio_in[2]=0): ui_in = {weight[3:0], 2'b00, neuron_y, neuron_x}
+//    weight hdr   (uio_in[2]=1, uio_in[3]=0):
+//                 ui_in[2]=0 write / 1 read, ui_in[7:4]=weight nibble (write)
+//    ISA hdr      (uio_in[2]=1, uio_in[3]=1): ui_in = {op5[4:0], barrier, neuron_y, neuron_x}
 //
 // Note on NEUTERN_NEURON_LOCAL_W = 1:
 //   1 bit per axis → 2 addressable positions per axis (values 0..1).
@@ -65,7 +65,7 @@ package tt_um_neutern_pkg;
 
     // ── Project-local spike flit type ────────────────────────────────────────
     // 6-bit spike (zero-padded to 8-bit TT wire): 4-bit signed weight + 1-bit Y + 1-bit X.
-    // Wire mapping: {weight[3:0], 2'b00, neuron_y[0], neuron_x[0]}.
+    // Spike-mode wire mapping: {weight[3:0], 2'b00, neuron_y[0], neuron_x[0]}.
     // Does NOT include event_time (removed to fit the TT boundary).
     typedef struct packed {
         logic signed [NEUTERN_WEIGHT_W-1:0]       weight;    // [7:4] signed weight (-8..+7)

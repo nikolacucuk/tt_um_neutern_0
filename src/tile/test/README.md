@@ -59,7 +59,7 @@ Verilator to exceed its convergence limit (`--converge-limit 500`).
 This loop is only active when the compute core is processing spikes. Tests
 that send spikes and wait for output trigger this condition and cannot pass
 through the flat wrapper. These same paths are exercised at the **TT-boundary
-level** by `test/test.py` (29/29 PASS), which uses the registered
+level** by `test/test.py` (31/31 PASS), which uses the registered
 `tile_top_tt` adapter that breaks the loop.
 
 ## tile_top_flat.sv

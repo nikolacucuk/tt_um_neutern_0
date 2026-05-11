@@ -1136,8 +1136,9 @@ module logical_neuron_state_bank
                     ? cff_flags_target
                     : target_bram_rd_data[DUMP_BYTE_FLAGS*8 +: 8];
                 // CSR_VEC_BASE_23 returns the low byte of fanout_ptr.
-                CSR_VEC_BASE_23: target_csr_read_data =
-                    target_bram_rd_data[DUMP_BYTE_FANOUT_PTR*8 +: 8];
+                CSR_VEC_BASE_23: target_csr_read_data = STATE_ROW_NO_FANOUT_BYTES
+                    ? 8'h00
+                    : target_bram_rd_data[DUMP_BYTE_FANOUT_PTR*8 +: 8];
                 CSR_INIT_VI: target_csr_read_data = !USE_BRAM
                     ? cff_init_v_target
                     : target_bram_rd_data[DUMP_BYTE_V_MEM*8 +: 8];

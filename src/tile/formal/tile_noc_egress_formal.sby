@@ -9,6 +9,6 @@ read_verilog -formal -D FORMAL -sv rv_if.sv tile_noc_egress.sv tile_noc_egress_f
 prep -top tile_noc_egress_formal
 
 [files]
-../../../common/interfaces/rv_if.sv
+../../common/interfaces/rv_if.sv
 ../src/tile_noc_egress.sv
 tile_noc_egress_formal.sv

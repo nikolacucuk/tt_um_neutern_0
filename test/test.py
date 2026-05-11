@@ -6,13 +6,22 @@ test.py — exhaustive cocotb verification for tt_um_neutern_0 (TT boundary)
 DUT top-level: tb (tb.v) wrapping tt_um_neutern_0 → tile_top_tt → tile_top
 
 TT pin mapping (tile_top_tt adapter, architecture §tile_top_tt):
-  ui_in[7:0]  = neutern_spike_t flit {weight[3:0], 2'b00, neuron_y[0], neuron_x[0]}
-    [7:4] weight[3:0]  signed 4-bit (-8..+7)
-    [3:2] reserved     2'b00 (ignored by tile)
-    [1]   neuron_y[0]  row address (0 or 1)
-    [0]   neuron_x[0]  column address (0 or 1)
+    ui_in[7:0]  = mode-dependent flit byte
+        Spike mode (uio_in[2]=0):
+            [7:4] weight[3:0]  signed 4-bit (-8..+7)
+            [3:2] reserved     2'b00 (ignored by tile)
+            [1]   neuron_y[0]  row address (0 or 1)
+            [0]   neuron_x[0]  column address (0 or 1)
+        Weight header mode (uio_in[2]=1, uio_in[3]=0):
+            [2]   read/write selector (0=write, 1=readback)
+            [7:4] weight nibble for write mode
+            [1:0] target neuron coordinates
+        ISA header mode (uio_in[2]=1, uio_in[3]=1):
+            [7:3] op5, [2] barrier, [1:0] target coordinates
   uio_in[0]   = rv_in_valid   (host→tile flow: spike valid)
   uio_in[1]   = rv_out_ready  (host←tile flow: host ready to receive)
+    uio_in[2]   = rv_in_is_header
+    uio_in[3]   = rv_in_header_is_isa
   uio_out[0]  = rv_in_ready   (tile back-pressure signal)
   uio_out[1]  = rv_out_valid  (tile output spike valid)
   uo_out[7:0] = rv_out_payload (same neutern_spike_t format as ui_in)
@@ -31,6 +40,7 @@ Verification coverage:
   §F  — Burst and back-to-back flit transport
   §E  — Enable gating: ena=0 stops tile activity
   §O  — Output flit format: uo_out encoding correctness
+    §C  — Header config/readback: weight write/read and ISA header ack
 """
 
 from __future__ import annotations
@@ -50,6 +60,8 @@ NEURONS_PER_TILE = 4         # 2×2 grid
 # uio_in bit positions (host-driven)
 UIO_RV_IN_VALID  = 0         # bit 0: host→tile spike valid
 UIO_RV_OUT_READY = 1         # bit 1: host ready to receive tile output
+UIO_RV_IN_IS_HEADER = 2      # bit 2: 1=header packet, 0=normal spike flit
+UIO_RV_IN_HEADER_IS_ISA = 3  # bit 3: with bit2=1, 1=ISA header, 0=weight header
 
 # uio_out bit positions (tile-driven)
 UIO_RV_IN_READY  = 0         # bit 0: tile accepts input (back-pressure)
@@ -70,6 +82,30 @@ def spike_flit(weight: int, neuron_y: int, neuron_x: int) -> int:
     """
     w4 = weight & 0xF   # two's complement 4-bit
     return ((w4 & 0xF) << 4) | ((neuron_y & 0x1) << 1) | (neuron_x & 0x1)
+
+
+def weight_header_flit(weight: int, neuron_y: int, neuron_x: int, *, read: bool) -> int:
+        """
+        Encode a weight-header flit (uio_in[2]=1, uio_in[3]=0):
+            [7:4] weight nibble (used for write)
+            [2]   0=write, 1=read
+            [1]   neuron_y[0]
+            [0]   neuron_x[0]
+        """
+        w4 = weight & 0xF
+        return ((w4 & 0xF) << 4) | ((1 if read else 0) << 2) | ((neuron_y & 0x1) << 1) | (neuron_x & 0x1)
+
+
+def isa_header_flit(op5: int, neuron_y: int, neuron_x: int, *, barrier: int = 0) -> int:
+        """
+        Encode an ISA-header flit (uio_in[2]=1, uio_in[3]=1):
+            [7:3] op5 opcode
+            [2]   barrier bit
+            [1]   neuron_y[0]
+            [0]   neuron_x[0]
+        """
+        op5v = op5 & 0x1F
+        return (op5v << 3) | ((barrier & 0x1) << 2) | ((neuron_y & 0x1) << 1) | (neuron_x & 0x1)
 
 
 def unpack_flit(byte_val: int) -> dict:
@@ -140,6 +176,99 @@ async def _send_spike(dut, flit: int, timeout_cycles: int = 50) -> None:
     uio = int(dut.uio_in.value) & ~(1 << UIO_RV_IN_VALID)
     dut.uio_in.value = uio
     dut.ui_in.value  = 0
+
+
+async def _send_flit(
+    dut,
+    flit: int,
+    *,
+    is_header: bool,
+    header_is_isa: bool,
+    timeout_cycles: int = 50,
+) -> None:
+    """
+    Send one byte on ui_in with explicit header mode controls on uio_in[3:2].
+    """
+    dut.ui_in.value = flit
+
+    uio = int(dut.uio_in.value)
+    uio |= (1 << UIO_RV_IN_VALID)
+    if is_header:
+        uio |= (1 << UIO_RV_IN_IS_HEADER)
+    else:
+        uio &= ~(1 << UIO_RV_IN_IS_HEADER)
+    if header_is_isa:
+        uio |= (1 << UIO_RV_IN_HEADER_IS_ISA)
+    else:
+        uio &= ~(1 << UIO_RV_IN_HEADER_IS_ISA)
+    dut.uio_in.value = uio
+
+    deadline = timeout_cycles
+    while True:
+        await ReadOnly()
+        if _rv_in_ready(dut):
+            await RisingEdge(dut.clk)
+            break
+        await RisingEdge(dut.clk)
+        deadline -= 1
+        assert deadline > 0, (
+            f"rv_in handshake timeout after {timeout_cycles} cycles "
+            f"(flit=0x{flit:02x}, is_header={int(is_header)}, header_is_isa={int(header_is_isa)})"
+        )
+
+    # Drop valid and restore non-header mode defaults for subsequent spikes.
+    uio = int(dut.uio_in.value)
+    uio &= ~(1 << UIO_RV_IN_VALID)
+    uio &= ~(1 << UIO_RV_IN_IS_HEADER)
+    uio &= ~(1 << UIO_RV_IN_HEADER_IS_ISA)
+    dut.uio_in.value = uio
+    dut.ui_in.value = 0
+
+
+async def _try_recv_flit(dut, timeout_cycles: int = 30):
+    """
+    Try receiving one output flit; return None if no flit appears before timeout.
+    """
+    deadline = timeout_cycles
+    while deadline > 0:
+        await ReadOnly()
+        if _rv_out_valid(dut):
+            raw = int(dut.uo_out.value)
+            await RisingEdge(dut.clk)
+            return unpack_flit(raw)
+        await RisingEdge(dut.clk)
+        deadline -= 1
+    return None
+
+
+async def _send_weight_header_write(dut, *, weight: int, neuron_y: int, neuron_x: int) -> None:
+    await _send_flit(
+        dut,
+        weight_header_flit(weight=weight, neuron_y=neuron_y, neuron_x=neuron_x, read=False),
+        is_header=True,
+        header_is_isa=False,
+        timeout_cycles=80,
+    )
+
+
+async def _send_weight_header_read(dut, *, neuron_y: int, neuron_x: int) -> None:
+    await _send_flit(
+        dut,
+        weight_header_flit(weight=0, neuron_y=neuron_y, neuron_x=neuron_x, read=True),
+        is_header=True,
+        header_is_isa=False,
+        timeout_cycles=80,
+    )
+
+
+async def _send_isa_header(dut, *, op5: int, neuron_y: int, neuron_x: int, barrier: int = 0) -> None:
+    await _send_flit(
+        dut,
+        isa_header_flit(op5=op5, neuron_y=neuron_y, neuron_x=neuron_x, barrier=barrier),
+        is_header=True,
+        header_is_isa=True,
+        timeout_cycles=80,
+    )
 
 
 async def _recv_flit(dut, timeout_cycles: int = 200) -> dict:
@@ -437,13 +566,13 @@ async def test_zero_weight(dut):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# §I — Reserved bits: ui_in[3:2] must be ignored by the tile
+# §I — Reserved bits in spike mode: ui_in[3:2] must be ignored
 # ─────────────────────────────────────────────────────────────────────────────
 
 @cocotb.test(timeout_time=20, timeout_unit="ms")
 async def test_reserved_bits_ignored(dut):
     """
-    §I — Reserved bits ui_in[3:2] are ignored by tile_top_tt adapter.
+    §I — In spike mode (uio_in[2]=0), ui_in[3:2] are ignored by tile_top_tt.
 
     Sends spikes with reserved bits set to 0b01, 0b10, 0b11 and verifies
     the tile does not stall or crash (it must treat them as don't-care).
@@ -913,4 +1042,86 @@ async def test_rapid_reset_recovery(dut):
         f"X/Z on uio_out after rapid reset cycles: {uio_str}"
     assert _rv_out_valid(dut) == 0, "rv_out_valid must be 0 after reset"
     assert _rv_in_ready(dut) == 1, "rv_in_ready must be 1 after reset"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# §C — Header-based neuron configuration and readback
+# ─────────────────────────────────────────────────────────────────────────────
+
+@cocotb.test(timeout_time=40, timeout_unit="ms")
+async def test_weight_header_write_then_readback_all_neurons(dut):
+    """
+    §C — Header write updates per-neuron weight and header read returns it.
+
+    Flow per neuron:
+      1) Send weight header write (uio[2]=1, uio[3]=0, ui[2]=0)
+      2) Drain status response (MSG_STATUS_OK)
+      3) Send weight header read  (uio[2]=1, uio[3]=0, ui[2]=1)
+      4) Receive readback flit and verify weight + neuron coordinates
+    """
+    cocotb.start_soon(Clock(dut.clk, CLK_PERIOD_US, units="us").start())
+    await _reset(dut)
+
+    vectors = [
+        (0, 0, 3),
+        (0, 1, -2),
+        (1, 0, 7),
+        (1, 1, -8),
+    ]
+
+    for ny, nx, weight in vectors:
+        await _send_weight_header_write(dut, weight=weight, neuron_y=ny, neuron_x=nx)
+
+        # Write path returns an immediate status response; consume it so the
+        # following readback check observes the CMD_WEIGHT read response.
+        status_rsp = await _recv_flit(dut, timeout_cycles=200)
+        assert status_rsp["weight"] == 0, (
+            "Expected status code 0x0 on write acknowledge"
+        )
+
+        await _send_weight_header_read(dut, neuron_y=ny, neuron_x=nx)
+        read_rsp = await _recv_flit(dut, timeout_cycles=200)
+
+        assert read_rsp["neuron_y"] == ny, (
+            f"Readback neuron_y mismatch: expected {ny}, got {read_rsp['neuron_y']}"
+        )
+        assert read_rsp["neuron_x"] == nx, (
+            f"Readback neuron_x mismatch: expected {nx}, got {read_rsp['neuron_x']}"
+        )
+        assert read_rsp["weight"] == weight, (
+            f"Readback weight mismatch for neuron ({ny},{nx}): "
+            f"expected {weight}, got {read_rsp['weight']}"
+        )
+
+
+@cocotb.test(timeout_time=40, timeout_unit="ms")
+async def test_isa_header_program_ack(dut):
+    """
+    §C — ISA header packets are accepted and acknowledged for each neuron.
+
+    Sends one ISA header per neuron and verifies a status response is emitted.
+    """
+    cocotb.start_soon(Clock(dut.clk, CLK_PERIOD_US, units="us").start())
+    await _reset(dut)
+
+    vectors = [
+        (0, 0, 0x00, 0),
+        (0, 1, 0x05, 1),
+        (1, 0, 0x08, 0),
+        (1, 1, 0x0B, 1),
+    ]
+
+    for ny, nx, op5, barrier in vectors:
+        await _send_isa_header(
+            dut,
+            op5=op5,
+            neuron_y=ny,
+            neuron_x=nx,
+            barrier=barrier,
+        )
+
+        ack = await _recv_flit(dut, timeout_cycles=200)
+        assert ack["weight"] == 0, (
+            f"ISA header ack not OK for neuron ({ny},{nx}), op5=0x{op5:02x}"
+        )
 

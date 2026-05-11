@@ -25,10 +25,21 @@ module tt_um_neutern_0 (
   //   Defined in tt_um_neutern_pkg.sv as:
   //   { weight[3:0], neuron_y[0], neuron_x[0] }
   //
-  //   Bits [7:4] = weight   — 4-bit signed synaptic weight (-8..+7)
-  //   Bits [3:2] = unused   — reserved, host drives 0 / tile drives 0
-  //   Bit  [1]   = neuron_y — Y coordinate within tile (0..1)
-  //   Bit  [0]   = neuron_x — X coordinate within tile (0..1)
+    //   Normal spike mode (uio_in[2]=0):
+    //     Bits [7:4] = weight   — 4-bit signed synaptic weight (-8..+7)
+    //     Bits [3:2] = reserved — host drives 0
+    //     Bit  [1]   = neuron_y — Y coordinate within tile (0..1)
+    //     Bit  [0]   = neuron_x — X coordinate within tile (0..1)
+    //
+       //   Weight-header mode (uio_in[2]=1 and uio_in[3]=0):
+       //     Bit  [2]   = 0 write weight / 1 read current weight
+       //     Bits [7:4] = weight nibble for write mode
+       //     Bits [1:0] = target neuron coordinates
+       //
+    //   ISA header mode (uio_in[2]=1 and uio_in[3]=1):
+    //     Bits [7:3] = op5      — neuron opcode field
+    //     Bit  [2]   = barrier  — instruction barrier/tag bit
+    //     Bits [1:0] = neuron_y/x target coordinates
   //
   // Single-cycle, single-byte transfer: ui_in[7:0] carries the full flit.
   // event_time is NOT included; timing is managed at the host driver level.
@@ -41,11 +52,12 @@ module tt_um_neutern_0 (
   //
   // Pin usage summary
   // ---------------------------------------------------------------------------
-  // Inputs (ui_in):
-  //   ui_in[7:4]   USED   → weight[3:0]          (4-bit signed synaptic weight)
-  //   ui_in[3:2]   UNUSED  reserved, ignored
-  //   ui_in[1]     USED   → neuron_y[0]           (Y coordinate 0..1)
-  //   ui_in[0]     USED   → neuron_x[0]           (X coordinate 0..1)
+    // Inputs (ui_in):
+    //   ui_in[7:4]   USED   → spike weight[3:0] or ISA op5[4:1]
+    //   ui_in[3]     USED   → ISA op5[0] when ISA header mode is selected
+       //   ui_in[2]     USED   → weight-header read/write selector OR ISA barrier bit
+    //   ui_in[1]     USED   → neuron_y[0] (target coordinate)
+    //   ui_in[0]     USED   → neuron_x[0] (target coordinate)
   //
   // Dedicated outputs (uo_out):
   //   uo_out[7:4]  USED   ← weight[3:0]          (4-bit signed synaptic weight)
@@ -56,7 +68,9 @@ module tt_um_neutern_0 (
   // Bidirectional (uio), configured as:
   //   uio_in[0]    USED   → rv_in.valid           (host asserts flit byte valid)
   //   uio_in[1]    USED   → rv_out.ready          (host asserts downstream ready)
-  //   uio_in[7:2]  UNUSED  input, tied off via _unused
+  //   uio_in[2]    USED   → rv_in_is_header       (1=config header, 0=normal spike)
+  //   uio_in[3]    USED   → rv_in_header_is_isa   (1=ISA header, 0=weight header)
+  //   uio_in[7:4]  UNUSED  input, tied off via _unused
   //   uio_out[0]   USED   ← rv_in.ready           (tile asserts ready to receive)
   //   uio_out[1]   USED   ← rv_out.valid          (tile asserts output byte valid)
   //   uio_out[7:2] UNUSED  driven low (direction=input, uio_oe[7:2]=0)
@@ -73,8 +87,8 @@ module tt_um_neutern_0 (
   wire        rv_out_valid_w;
   wire [7:0]  rv_out_payload_w;  // {weight[3:0], 2'b00, neuron_y[0], neuron_x[0]} (2x2 grid)
 
-  // Suppress unused-input warnings for uio_in[7:2] and ena
-  wire _unused = &{ena, uio_in[7:2], 1'b0};
+  // Suppress unused-input warnings for uio_in[7:4] and ena
+  wire _unused = &{ena, uio_in[7:4], 1'b0};
 
   assign uio_oe  = 8'b00000011;                              // [1:0]=output, [7:2]=input(unused)
   assign uio_out = {6'b0, rv_out_valid_w, rv_in_ready_w};    // [7:2]=0(unused) [1]=rv_out.valid [0]=rv_in.ready
@@ -94,6 +108,8 @@ module tt_um_neutern_0 (
       // rv_in: host → tile
       .rv_in_valid           (uio_in[0]),
       .rv_in_payload         (ui_in[7:0]),
+      .rv_in_is_header       (uio_in[2]),
+      .rv_in_header_is_isa   (uio_in[3]),
       .rv_in_ready           (rv_in_ready_w),
       // rv_out: tile → host
       .rv_out_valid          (rv_out_valid_w),

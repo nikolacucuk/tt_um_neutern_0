@@ -3,7 +3,7 @@
 This directory contains the **primary verification testbench** for the `tt_um_neutern_0` TinyTapeout submission.
 It uses [cocotb](https://docs.cocotb.org/en/stable/) with Verilator to exhaustively test the DUT through the TT-standard pin interface.
 
-## Test coverage (`test.py` — 29 tests, all passing)
+## Test coverage (`test.py` — 31 tests, including header config/readback)
 
 The testbench exercises the full TT pin interface of the SNN tile:
 
@@ -13,7 +13,8 @@ The testbench exercises the full TT pin interface of the SNN tile:
 | RV-in protocol | `test_rv_in_ready_asserted_at_idle`, `test_no_transfer_without_valid`, `test_single_flit_handshake` | `uio_in[0]`=valid, `uio_out[0]`=ready handshake |
 | Spike ingress | `test_spike_to_all_four_neurons`, `test_spike_neuron_00/10/01/11` | All neuron grid positions |
 | Weight encoding | `test_all_weight_values_accepted`, `test_max_positive_weight`, `test_max_negative_weight`, `test_zero_weight` | Full 4-bit signed weight range |
-| Reserved bits | `test_reserved_bits_ignored`, `test_full_flit_sweep_no_crash` | `ui_in[1:0]` ignored |
+| Reserved bits (spike mode) | `test_reserved_bits_ignored`, `test_full_flit_sweep_no_crash` | `ui_in[3:2]` ignored when `uio_in[2]=0` |
+| Header config/readback | `test_weight_header_write_then_readback_all_neurons`, `test_isa_header_program_ack` | Weight write/read headers and ISA headers |
 | Back-pressure | `test_rv_out_valid_held_when_ready_0`, `test_rv_out_ready_0_does_not_cause_deadlock` | `uio_in[1]`=ready flow control |
 | Burst / pipeline | `test_back_to_back_flits_same_neuron`, `test_back_to_back_flits_all_neurons`, `test_burst_8_flits_mixed_neurons_weights` | Multi-flit streams |
 | Enable gating | `test_enable_disable_recover`, `test_enable_0_no_output` | `ena` signal gating |
@@ -24,9 +25,11 @@ The testbench exercises the full TT pin interface of the SNN tile:
 
 | Signal | Description |
 |---|---|
-| `ui_in[7:0]` | Spike flit: `{weight[3:0], 2'b00, neuron_y[0], neuron_x[0]}` |
+| `ui_in[7:0]` | Mode-dependent flit byte (spike / weight-header / ISA-header) |
 | `uio_in[0]` | `rv_in_valid` — host asserts to present a flit |
 | `uio_in[1]` | `rv_out_ready` — host asserts to accept output |
+| `uio_in[2]` | `rv_in_is_header` — `0`: spike mode, `1`: header mode |
+| `uio_in[3]` | `rv_in_header_is_isa` — with bit2=`1`: `0`: weight header, `1`: ISA header |
 | `uio_out[0]` | `rv_in_ready` — tile asserts when ingress can accept |
 | `uio_out[1]` | `rv_out_valid` — tile asserts when output is available |
 | `uo_out[7:0]` | `rv_out_payload[7:0]` — output flit byte |

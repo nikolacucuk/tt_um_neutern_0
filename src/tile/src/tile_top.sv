@@ -84,6 +84,8 @@ module tile_top
     output wire                  tile_graph_state_clear_r_obs
 `endif
 );
+    wire clk_regs = clk;
+
     // Tile coordinates used internally by sub-module instances.  Previously
     // plumbed in as ports from tile_top_packed; now derived directly from
     // the TILE_COORD_X / TILE_COORD_Y parameters after the wrapper collapse.
@@ -491,7 +493,7 @@ module tile_top
 
     // (shared_fanout_resp_valid_c is assigned from fanout_pool_rsp_if.valid above)
 
-    always_ff @(posedge clk or negedge rst_n) begin
+    always_ff @(posedge clk_regs or negedge rst_n) begin
         if (!rst_n) begin
             shared_fanout_req_host_pending_r <= 1'b0;
             shared_fanout_req_exec_pending_r <= 1'b0;
@@ -838,7 +840,7 @@ module tile_top
     // Broadcast serialization counter: started when ingress fires a bcast
     // spike, walks addr 1..N-1 (addr 0 already enqueued above), clears when
     // addr reaches N-1.
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk_regs) begin
         if (!rst_n || tile_graph_state_clear_r) begin
             ingress_bcast_in_progress_r <= 1'b0;
             ingress_bcast_addr_r        <= '0;
@@ -886,7 +888,7 @@ module tile_top
         .INGRESS_QUEUE_DEPTH(INGRESS_QUEUE_DEPTH),
         .MESSAGE_W(MESSAGE_W)
     ) u_ingress (
-        .clk(clk),
+        .clk(clk_regs),
         .rst_n(rst_n),
         .ena(ena),
         .tile_x_coord(tile_x_coord),
@@ -960,7 +962,7 @@ module tile_top
         .FANOUT_DST_Y_W(FANOUT_DST_Y_W),
         .FANOUT_CORE_ID_W(FANOUT_CORE_ID_W)
     ) u_host_io (
-        .clk(clk),
+        .clk(clk_regs),
         .rst_n(rst_n),
         .ena(ena),
         .tile_x_coord(tile_x_coord),
@@ -1036,7 +1038,7 @@ module tile_top
         .FANOUT_DST_Y_W(FANOUT_DST_Y_W),
         .FANOUT_CORE_ID_W(FANOUT_CORE_ID_W)
     ) u_fanout_executor (
-        .clk(clk),
+        .clk(clk_regs),
         .rst_n(rst_n),
         .ena(ena),
         .tile_x_coord(tile_x_coord),
@@ -1099,7 +1101,7 @@ module tile_top
         .SYNAPSE_SID_W(SYNAPSE_SID_W),
         .LOCAL_Z(LOCAL_Z)
     ) u_dispatch_scheduler (
-        .clk(clk),
+        .clk(clk_regs),
         .rst_n(rst_n),
         .ena(ena),
         .tile_graph_state_clear(tile_graph_state_clear_r),
@@ -1184,7 +1186,7 @@ module tile_top
         .DROP_DISPATCH_BRAM_ON_COMPACT(DROP_DISPATCH_BRAM_ON_COMPACT_CFG),
         .SHARED_NEURON_CONFIG(IS_ASIC_LEAN ? 1 : 0)
     ) u_state_bank (
-        .clk(clk),
+        .clk(clk_regs),
         .rst_n(rst_n),
         .ena(ena),
         .graph_state_clear(tile_graph_state_clear_r),
@@ -1239,7 +1241,7 @@ module tile_top
         .CONTEXT_SPLIT_LAYOUT(CONTEXT_SPLIT_LAYOUT_CFG),
         .DUAL_READ_CONTEXT(DUAL_READ_CONTEXT_CFG)
     ) u_context_bank (
-        .clk(clk),
+        .clk(clk_regs),
         .rst_n(rst_n),
         .ena(ena),
         .graph_state_clear(tile_graph_state_clear_r),
@@ -1278,7 +1280,7 @@ module tile_top
         .MEM_STYLE_HINT       (TILE_BANK_MEM_STYLE),
         .EVENT_W              (EQ_ELEM_W)
     ) u_event_queue_bank (
-        .clk            (clk),
+        .clk            (clk_regs),
         .rst_n          (rst_n),
         .ena            (ena),
         .soft_reset_valid(soft_reset_valid_sbank_c),
@@ -1312,7 +1314,7 @@ module tile_top
         .FANOUT_DST_Y_W   (FANOUT_DST_Y_W),
         .FANOUT_CORE_ID_W (FANOUT_CORE_ID_W)
     ) u_fanout_pool (
-        .clk                (clk),
+        .clk                (clk_regs),
         .rst_n              (rst_n),
         .ena                (ena),
         .graph_state_clear  (tile_graph_state_clear_r),
@@ -1332,7 +1334,7 @@ module tile_top
         .UCODE_WORDS_PER_NEURON(UCODE_WORDS_PER_NEURON_CFG),
         .UCODE_SHARED_BANK(UCODE_SHARED_BANK_CFG)
     ) u_ucode_bank (
-        .clk(clk),
+        .clk(clk_regs),
         .rst_n(rst_n),
         .ena(ena),
         .write_en(ucode_write_en_mux_c),
@@ -1350,7 +1352,7 @@ module tile_top
     tile_noc_egress #(
         .PAYLOAD_W(MESSAGE_W)
     ) u_noc_egress (
-        .clk(clk),
+        .clk(clk_regs),
         .rst_n(rst_n),
         .ena(ena),
         .graph_state_clear(tile_graph_state_clear_r),
@@ -1383,7 +1385,7 @@ module tile_top
         .FIFO_DEPTH_PER_WORKER(FANOUT_SPIKE_FIFO_DEPTH_CFG),
         .MEM_STYLE_HINT       (TILE_BANK_MEM_STYLE)
     ) u_fanout_bank (
-        .clk(clk), .rst_n(rst_n), .ena(ena), .graph_state_clear(tile_graph_state_clear_r),
+        .clk(clk_regs), .rst_n(rst_n), .ena(ena), .graph_state_clear(tile_graph_state_clear_r),
         .enqueue_valid(1'b0), .enqueue_data('0), .enqueue_ready(fo_enq_ready_w),
         .dequeue_ready(1'b0), .dequeue_valid(fo_deq_valid_w), .dequeue_data(fo_deq_data_w),
         .mem_stall(fo_stall_w)
@@ -1425,7 +1427,7 @@ module tile_top
     (* keep_hierarchy = "no" *) neuron_compute_core #(
         .LOGICAL_IDX_W(NEURON_IDX_W)
     ) u_compute (
-        .clk              (clk),
+        .clk              (clk_regs),
         .rst_n            (rst_n),
         .ena              (ena),
         .graph_state_clear(tile_graph_state_clear_r),
@@ -1454,7 +1456,7 @@ module tile_top
     // clear to match the reset style of the debug counters below, but
     // timing-wise this is just a single flop between the ingress decode
     // and all ~290 downstream consumers.
-    always_ff @(posedge clk or negedge rst_n) begin
+    always_ff @(posedge clk_regs or negedge rst_n) begin
         if (!rst_n) begin
             tile_graph_state_clear_r <= 1'b0;
         end else if (ena) begin

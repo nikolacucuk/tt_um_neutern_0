@@ -18,13 +18,32 @@
 //  └──────────────────────────────────────────────────────────────────────┘
 //
 // INGRESS expansion  (neutern_spike_t → message_packet_t)
-//   kind       = MSG_INPUT
-//   dst_x/y    = TILE_COORD_X / TILE_COORD_Y
-//   core_id    = flat_idx = neuron_y * NEURONS_PER_ROW + neuron_x
-//   data       = {{4{weight[3]}}, weight[3:0]}  (sign-extended to 8 bits)
-//   event_time = 0                               (not carried in neutern_spike_t)
-//   meta       = PKT_PLANE_DATA
-//   all other fields = 0
+//   Normal spike path (rv_in_is_header=0)
+//     kind       = MSG_INPUT
+//     dst_x/y    = TILE_COORD_X / TILE_COORD_Y
+//     core_id    = flat_idx = neuron_y * NEURONS_PER_ROW + neuron_x
+//     data       = weight[3:0]
+//     meta       = PKT_PLANE_DATA
+//
+//   Header config path (rv_in_is_header=1)
+//     Weight header  (rv_in_header_is_isa=0)
+//     kind       = MSG_WRITE (ui_in[2]=0) or MSG_READ (ui_in[2]=1)
+//     cmd_kind   = CMD_WEIGHT
+//     core_id    = flat_idx = neuron_y * NEURONS_PER_ROW + neuron_x
+//     prog_index = flat_idx (absolute fanout slot in this 4-neuron profile)
+//     addr       = 0
+//     data       = weight[3:0] for write, ignored for read
+//     meta       = PKT_PLANE_CMD
+//
+//     ISA header     (rv_in_header_is_isa=1)
+//     kind       = MSG_PROG_WORD
+//     cmd_kind   = CMD_UCODE
+//     core_id    = flat_idx = neuron_y * NEURONS_PER_ROW + neuron_x
+//     prog_index = 0 (program first ucode word)
+//     encoded ucode word[11:0] = {op5, rd=0, sign=0, barrier, k[1:0]=0}
+//       op5     := rv_in_payload[7:3]
+//       barrier := rv_in_payload[2]
+//     meta       = PKT_PLANE_CMD
 //
 // EGRESS contraction  (message_packet_t MSG_OUTPUT → neutern_spike_t)
 //   weight     = out_pkt.data[3:0]
@@ -50,10 +69,17 @@
 
 `ifndef YOSYS
 import tile_pkg::CORE_ID_W;
+import tile_pkg::CMD_UCODE;
+import tile_pkg::CMD_WEIGHT;
 import tile_pkg::DATA_W;
 import tile_pkg::MSG_INPUT;
+import tile_pkg::MSG_PROG_WORD;
+import tile_pkg::MSG_READ;
+import tile_pkg::MSG_WRITE;
+import tile_pkg::PKT_PLANE_CMD;
 import tile_pkg::PKT_PLANE_DATA;
 import tile_pkg::TILE_COORD_W;
+import tile_pkg::header_spike_t;
 import tile_pkg::message_packet_t;
 import tile_pkg::packet_meta_with_plane;
 `endif
@@ -79,6 +105,8 @@ module tile_top_tt
     /* verilator lint_off UNUSEDSIGNAL */
     input  wire [7:0] rv_in_payload,    // { weight[3:0], 2'b00, neuron_y[0], neuron_x[0] }
     /* verilator lint_on UNUSEDSIGNAL */
+    input  wire       rv_in_is_header,
+    input  wire       rv_in_header_is_isa,
     output wire       rv_in_ready,
     // rv_out (tile → host) — neutern_spike_t boundary flit
     output wire       rv_out_valid,
@@ -93,37 +121,65 @@ module tile_top_tt
     // ── Ingress: neutern_spike_t → message_packet_t ───────────────────────────
     // Decompose the 8-bit input flit: { weight[3:0], 2'b00, neuron_y[0], neuron_x[0] }
     // Bits [3:2] are reserved/zero; only 1-bit coords are used (2×2 grid).
-    wire [3:0] in_weight   = rv_in_payload[7:4];   // 4-bit signed synaptic weight
-    wire [0:0] in_neuron_y = rv_in_payload[1];     // 1-bit Y coordinate (0..1)
-    wire [0:0] in_neuron_x = rv_in_payload[0];     // 1-bit X coordinate (0..1)
+    header_spike_t in_flit;
+    assign in_flit.weight   = rv_in_payload[7:4];
+    assign in_flit.neuron_y = rv_in_payload[1];
+    assign in_flit.neuron_x = rv_in_payload[0];
 
     // Flat neuron index: core_id = neuron_y * NEURONS_PER_ROW + neuron_x.
     // Sized to CORE_ID_W bits; the multiply result fits because max flat_idx
     // = (2^1-1)*2 + 1 = 3 which requires only 2 bits (CORE_ID_W=3 ≥ 2).
     wire [CORE_ID_W-1:0] in_core_id =
-        CORE_ID_W'(in_neuron_y * NEURONS_PER_ROW + in_neuron_x);
+        CORE_ID_W'(in_flit.neuron_y * NEURONS_PER_ROW + in_flit.neuron_x);
 
-    // rv_in_payload[3:2] are protocol-reserved zeros (2×2 grid, 1-bit coords).
-    // Explicitly consumed here to satisfy UNUSEDSIGNAL without suppression.
-    wire _unused_rv_in = &{rv_in_payload[3:2]};
+    // Header mode subfield carried on ui_in[2].
+    //   ISA mode: barrier bit.
+    //   Weight-header mode: 1=read current weight, 0=write weight.
+    wire       in_header_mode_bit = rv_in_payload[2];
+
+    // ISA-header fields: op5 + barrier bit.
+    wire [4:0] in_isa_op5 = rv_in_payload[7:3];
+    wire       in_isa_barrier = in_header_mode_bit;
 
     // Sign-extend 4-bit weight to the 4-bit message_packet_t.data field (DATA_W=4).
-    wire [DATA_W-1:0] in_data = in_weight;
+    wire [DATA_W-1:0] in_data = DATA_W'(in_flit.weight);
 
     // Build the full message_packet_t for tile_top rv_in.
     message_packet_t in_pkt;
     always_comb begin
         in_pkt            = '0;
         in_pkt.kind       = MSG_INPUT;
+        in_pkt.cmd_kind   = '0;
         in_pkt.broadcast  = 1'b0;
         in_pkt.dst_x      = TILE_COORD_W'(TILE_COORD_X);
         in_pkt.dst_y      = TILE_COORD_W'(TILE_COORD_Y);
         // src_x/src_y removed from message_packet_t (single-tile profile)
         in_pkt.core_id    = CORE_ID_W'(in_core_id);
+        in_pkt.prog_index = '0;
+        in_pkt.addr       = '0;
         in_pkt.data       = in_data;
         // event_time removed from message_packet_t (neutern profile)
         in_pkt.tag        = '0;
-        in_pkt.meta       = packet_meta_with_plane(8'h00, PKT_PLANE_DATA);
+
+        if (rv_in_is_header) begin
+            in_pkt.meta = packet_meta_with_plane(8'h00, PKT_PLANE_CMD);
+            if (rv_in_header_is_isa) begin
+                in_pkt.kind       = MSG_PROG_WORD;
+                in_pkt.cmd_kind   = CMD_UCODE;
+                in_pkt.prog_index = '0;
+                // Encode compact ucode word[11:0] via message fields:
+                //   word[11:8]=weight, word[7:4]=addr, word[3:0]=data.
+                in_pkt.weight = {in_isa_op5[4:1]};
+                in_pkt.addr   = {in_isa_op5[0], 3'b000};
+                in_pkt.data   = {1'b0, in_isa_barrier, 2'b00};
+            end else begin
+                in_pkt.kind       = in_header_mode_bit ? MSG_READ : MSG_WRITE;
+                in_pkt.cmd_kind   = CMD_WEIGHT;
+                in_pkt.prog_index = in_core_id;
+            end
+        end else begin
+            in_pkt.meta = packet_meta_with_plane(8'h00, PKT_PLANE_DATA);
+        end
     end
 
     // Drive the internal rv_in channel with valid + the expanded packet.
@@ -173,7 +229,7 @@ module tile_top_tt
         .WORKER_CORES_PER_TILE (WORKER_CORES_PER_TILE),
         .FANOUT_POOL_DEPTH     (FANOUT_POOL_DEPTH),
         .MESSAGE_W             (MESSAGE_W),
-        .TILE_BANK_MEM_STYLE   (0)  // STYLE_AUTO: inferred RTL (sky130A compatible)
+        .TILE_BANK_MEM_STYLE   (3)  // ASIC-lean shared-bank configuration
     ) u_tile_top (
         .clk                   (clk),
         .rst_n                 (rst_n),

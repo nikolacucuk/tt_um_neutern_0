@@ -14,9 +14,11 @@ ready/valid (RV) protocol.
 
 | Pin | Direction | Description |
 |---|---|---|
-| `ui_in[7:0]` | input | Spike flit: `{weight[3:0], 2'b00, neuron_y[0], neuron_x[0]}` |
+| `ui_in[7:0]` | input | Mode-dependent flit byte (spike / weight-header / ISA-header) |
 | `uio_in[0]` | input | `rv_in_valid` — host presents a flit |
 | `uio_in[1]` | input | `rv_out_ready` — host ready to accept output |
+| `uio_in[2]` | input | `rv_in_is_header` — `0`: spike flit, `1`: header/config flit |
+| `uio_in[3]` | input | `rv_in_header_is_isa` — with `uio_in[2]=1`: `0`: weight header, `1`: ISA header |
 | `uio_out[0]` | output | `rv_in_ready` — tile can accept a flit |
 | `uio_out[1]` | output | `rv_out_valid` — tile has output available |
 | `uo_out[7:0]` | output | `rv_out_payload[7:0]` — output flit byte |
@@ -26,7 +28,7 @@ ready/valid (RV) protocol.
 
 ## Verification
 
-### TT-boundary tests (`test/test.py`) — **29/29 PASS** ✅
+### TT-boundary tests (`test/test.py`) — includes header config/readback coverage ✅
 
 Exercises the full DUT stack through TT pins using Verilator:
 
@@ -35,6 +37,7 @@ cd test && make SIM=verilator
 ```
 
 Coverage: spike ingress for all 4 neurons, full 4-bit signed weight range,
+header-based weight write/readback, ISA-header programming ack,
 back-pressure, burst streaming, enable gating, reset-during-transfer,
 and `uo_out` format verification.
 

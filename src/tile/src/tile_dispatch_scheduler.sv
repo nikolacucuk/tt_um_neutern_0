@@ -37,6 +37,7 @@ import tile_pkg::NEURON_EXEC_CTX_W;
 import tile_pkg::NEURON_IDX_W;
 import tile_pkg::TAG_W;
 import tile_pkg::WEIGHT_W;
+import tile_pkg::CORE_ID_W;
 import tile_pkg::context_commit_t;
 import tile_pkg::neuron_emit_t;
 import tile_pkg::neuron_exec_ctx_t;

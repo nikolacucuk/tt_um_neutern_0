@@ -67,3 +67,4 @@ src/tile/docs/tile_top_architecture.md
 .devcontainer/devcontainer.json
 /.devcontainer
 gl_test.log
+tools/flows/cocotb_flow.py

@@ -16,21 +16,21 @@ smtbmc yices
 
 [script]
 enqueue_liveness:   plugin -i slang
-enqueue_liveness:   read_slang --top tile_event_queue_bank_handshake_formal --compat-mode -DSYNTHESIS -DFORMAL -DENQUEUE_LIVENESS   tile_pkg.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv tile_event_queue_bank.sv tile_event_queue_bank_handshake_formal.sv
+enqueue_liveness:   read_slang --top tile_event_queue_bank_handshake_formal --compat-mode -DSYNTHESIS -DFORMAL -DENQUEUE_LIVENESS -f tile_event_queue_bank_handshake_formal_sources.f
 enqueue_liveness:   prep -top tile_event_queue_bank_handshake_formal
 
 dequeue_after_push: plugin -i slang
-dequeue_after_push: read_slang --top tile_event_queue_bank_handshake_formal --compat-mode -DSYNTHESIS -DFORMAL -DDEQUEUE_AFTER_PUSH tile_pkg.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv tile_event_queue_bank.sv tile_event_queue_bank_handshake_formal.sv
+dequeue_after_push: read_slang --top tile_event_queue_bank_handshake_formal --compat-mode -DSYNTHESIS -DFORMAL -DDEQUEUE_AFTER_PUSH -f tile_event_queue_bank_handshake_formal_sources.f
 dequeue_after_push: prep -top tile_event_queue_bank_handshake_formal
 
 count_bound:        plugin -i slang
-count_bound:        read_slang --top tile_event_queue_bank_handshake_formal --compat-mode -DSYNTHESIS -DFORMAL -DCOUNT_BOUND        tile_pkg.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv tile_event_queue_bank.sv tile_event_queue_bank_handshake_formal.sv
+count_bound:        read_slang --top tile_event_queue_bank_handshake_formal --compat-mode -DSYNTHESIS -DFORMAL -DCOUNT_BOUND -f tile_event_queue_bank_handshake_formal_sources.f
 count_bound:        prep -top tile_event_queue_bank_handshake_formal
 
 [files]
-../../../common/packages/tile_pkg.sv
-../../../common/packages/tile_flit_types.vh
-../../../common/mem/tile_mem_1r1w_sync.sv
-../../../common/mem/coldfoot_mem_bytelane_sync.sv
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../../common/mem/coldfoot_mem_bytelane_sync.sv
 ../src/tile_event_queue_bank.sv
 tile_event_queue_bank_handshake_formal.sv
+/workspaces/tt_um_neutern_0/src/tile/formal/tile_event_queue_bank_handshake_formal_sources.f

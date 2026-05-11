@@ -866,6 +866,41 @@ module tile_ingress
             (current_packet_c.kind == MSG_WRITE) &&
             (current_packet_c.cmd_kind == CMD_ROUTE);
 
+        // Host read issues are kicked by MSG_READ command packets and handled
+        // asynchronously by tile_host_io, which returns MSG_READ_RSP payloads.
+        ucode_host_read_issue =
+            current_packet_valid &&
+            current_packet_consume &&
+            current_local_tile_match &&
+            current_has_target &&
+            !current_core_broadcast &&
+            (current_packet_c.kind == MSG_READ) &&
+            (current_packet_c.cmd_kind == CMD_UCODE);
+        weight_host_read_issue =
+            current_packet_valid &&
+            current_packet_consume &&
+            current_local_tile_match &&
+            current_has_target &&
+            !current_core_broadcast &&
+            (current_packet_c.kind == MSG_READ) &&
+            (current_packet_c.cmd_kind == CMD_WEIGHT);
+        route_host_read_issue =
+            current_packet_valid &&
+            current_packet_consume &&
+            current_local_tile_match &&
+            current_has_target &&
+            !current_core_broadcast &&
+            (current_packet_c.kind == MSG_READ) &&
+            (current_packet_c.cmd_kind == CMD_ROUTE);
+        dump_neuron_issue =
+            current_packet_valid &&
+            current_packet_consume &&
+            current_local_tile_match &&
+            current_has_target &&
+            !current_core_broadcast &&
+            (current_packet_c.kind == MSG_READ) &&
+            (current_packet_c.cmd_kind == CMD_DUMP);
+
         ingress_consume = current_packet_consume;
     end
 

@@ -19,7 +19,6 @@ SRC_DIR = $(abspath ../../)
 VERILOG_SOURCES = \
   $(SRC_DIR)/common/packages/tile_pkg.sv \
   $(SRC_DIR)/common/interfaces/rv_if.sv \
-  $(SRC_DIR)/common/interfaces/rv_flit_if.sv \
   $(SRC_DIR)/common/arb/coldfoot_rr_arbiter.sv \
   $(SRC_DIR)/common/mem/tile_mem_1r1w_sync.sv \
   $(SRC_DIR)/common/mem/coldfoot_mem_bytelane_sync.sv \

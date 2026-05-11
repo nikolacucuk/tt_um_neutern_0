@@ -498,6 +498,12 @@ package tile_pkg;
 
     typedef struct packed {
         logic signed [WEIGHT_W-1:0] weight;
+        logic [NEURON_LOCAL_W-1:0]  neuron_y;
+        logic [NEURON_LOCAL_W-1:0]  neuron_x;
+    } header_spike_t;
+
+    typedef struct packed {
+        logic signed [WEIGHT_W-1:0] weight;
         logic [EVENT_TIME_W-1:0]    event_time;
         logic [NEURON_LOCAL_W-1:0]  neuron_y;
         logic [NEURON_LOCAL_W-1:0]  neuron_x;

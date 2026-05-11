@@ -44,9 +44,9 @@ no_emit_before_route_loaded: read_slang --top tile_fanout_executor_formal --comp
 no_emit_before_route_loaded: prep -top tile_fanout_executor_formal
 
 [files]
-../../../common/packages/tile_pkg.sv
-../../../common/packages/tile_flit_types.vh
-../../../common/interfaces/rv_if.sv
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../../common/interfaces/rv_if.sv
 ../src/tile_pkg.svh
 ../src/tile_fanout_executor.sv
 tile_fanout_executor_formal.sv
