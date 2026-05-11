@@ -5,7 +5,7 @@ project:
   discord:      ""                             # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "SNN network 2x2 neurons"      # One line description of what your project does
   language:     "System Verilog"               # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     1MHz                           # Clock frequency in Hz (or 0 if not applicable)
+  clock_hz:     1000000                         # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
   tiles: "4x2"                                 # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
@@ -17,29 +17,29 @@ project:
   # Source files must be in ./src and you must list each source file separately, one per line.
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
-    - "/tt_um_neutern_pkg.sv"
-    - "/common/packages/tile_pkg.sv"
-    - "/common/interfaces/rv_if.sv"
-    - "/common/interfaces/rv_flit_if.sv"
-    - "/common/arb/coldfoot_rr_arbiter.sv"
-    - "/common/mem/tile_mem_1r1w_sync.sv"
-    - "/common/mem/coldfoot_mem_bytelane_sync.sv"
-    - "/logical_neuron/src/logical_neuron_pkg.sv"
-    - "/logical_neuron/src/logical_neuron_context_bank.sv"
-    - "/logical_neuron/src/logical_neuron_state_bank.sv"
-    - "/logical_neuron/src/logical_neuron_ucode_bank.sv"
-    - "/neuron_compute/src/neuron_exec.sv"
-    - "/neuron_compute/src/neuron_compute_core.sv"
-    - "/tile/src/tile_event_queue_bank.sv"
-    - "/tile/src/tile_fanout_bank.sv"
-    - "/tile/src/tile_fanout_pool.sv"
-    - "/tile/src/tile_ingress.sv"
-    - "/tile/src/tile_host_io.sv"
-    - "/tile/src/tile_fanout_executor.sv"
-    - "/tile/src/tile_dispatch_scheduler.sv"
-    - "/tile/src/tile_noc_egress.sv"
-    - "/tile/src/tile_top.sv"
-    - "/tile_top_tt.sv"
+    - "tt_um_neutern_pkg.sv"
+    - "common/packages/tile_pkg.sv"
+    - "common/interfaces/rv_if.sv"
+    - "common/interfaces/rv_flit_if.sv"
+    - "common/arb/coldfoot_rr_arbiter.sv"
+    - "common/mem/tile_mem_1r1w_sync.sv"
+    - "common/mem/coldfoot_mem_bytelane_sync.sv"
+    - "logical_neuron/src/logical_neuron_pkg.sv"
+    - "logical_neuron/src/logical_neuron_context_bank.sv"
+    - "logical_neuron/src/logical_neuron_state_bank.sv"
+    - "logical_neuron/src/logical_neuron_ucode_bank.sv"
+    - "neuron_compute/src/neuron_exec.sv"
+    - "neuron_compute/src/neuron_compute_core.sv"
+    - "tile/src/tile_event_queue_bank.sv"
+    - "tile/src/tile_fanout_bank.sv"
+    - "tile/src/tile_fanout_pool.sv"
+    - "tile/src/tile_ingress.sv"
+    - "tile/src/tile_host_io.sv"
+    - "tile/src/tile_fanout_executor.sv"
+    - "tile/src/tile_dispatch_scheduler.sv"
+    - "tile/src/tile_noc_egress.sv"
+    - "tile/src/tile_top.sv"
+    - "tile_top_tt.sv"
     - "project.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
