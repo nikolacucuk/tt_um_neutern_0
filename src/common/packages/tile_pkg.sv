@@ -64,6 +64,7 @@ package tile_pkg;
     //
     // FLIT_INLINE_PAYLOAD_W
     //   Inline payload space carried directly in the header flit.
+    /* verilator lint_off UNUSEDPARAM */
     parameter int unsigned FLIT_WIDTH           = 64;
     parameter logic [3:0]  FLIT_MAX_BODY_FLITS  = 4'd15;
     parameter int unsigned FLIT_PLANE_W         = 2;
@@ -122,6 +123,7 @@ package tile_pkg;
     parameter logic [FLIT_CLASS_W-1:0] DATA_CLASS_RSVD_2   = 4'h9;
     parameter logic [FLIT_CLASS_W-1:0] DATA_CLASS_RSVD_3   = 4'hA;
     parameter logic [FLIT_CLASS_W-1:0] DATA_CLASS_RSVD_4   = 4'hB;
+    /* verilator lint_on UNUSEDPARAM */
 
     // ── Flit virtual-channel assignments ────────────────────────────────────
     //

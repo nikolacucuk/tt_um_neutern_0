@@ -35,6 +35,7 @@
 
 package tt_um_neutern_pkg;
 
+/* verilator lint_off UNUSEDPARAM */
     // ── Grid geometry ─────────────────────────────────────────────────────────
     // Single tile, 2×2 neuron layout.
     localparam int unsigned NEUTERN_MESH_TILES_X  = 1;   // tiles in X direction
@@ -71,5 +72,6 @@ package tt_um_neutern_pkg;
         logic        [NEUTERN_NEURON_LOCAL_W-1:0] neuron_y; // [1]   Y coordinate (0..1)
         logic        [NEUTERN_NEURON_LOCAL_W-1:0] neuron_x; // [0]   X coordinate (0..1)
     } neutern_spike_t;
+/* verilator lint_on UNUSEDPARAM */
 
 endpackage

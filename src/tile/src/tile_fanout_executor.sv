@@ -24,9 +24,22 @@
 //   N-wide accept/conflict gates.
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::CMD_MESSAGE;
+import tile_pkg::CORE_ID_W;
+import tile_pkg::EVENT_TIME_W;
+import tile_pkg::MESSAGE_CORE_BCAST;
+import tile_pkg::MSG_SID_W;
+import tile_pkg::MSG_SPIKE;
+import tile_pkg::NEURON_IDX_W;
+import tile_pkg::PKT_PLANE_DATA;
+import tile_pkg::TAG_W;
+import tile_pkg::TILE_COORD_W;
+import tile_pkg::WEIGHT_W;
+import tile_pkg::fanout_read_rsp_t;
+import tile_pkg::message_packet_t;
+import tile_pkg::neuron_emit_t;
+import tile_pkg::packet_meta_with_plane;
+import tile_pkg::tile_event_t;
 `endif
 module tile_fanout_executor
   #(
@@ -615,6 +628,12 @@ module tile_fanout_executor
     message_packet_t fanout_packet_tmp;
     always_comb begin
         fanout_local_packet_view_c = message_packet_t'(fanout_packet_bits_r);
+        // fanout_packet_tmp: base is the current packet with weight field updated
+        // from the fanout read response.  Computed combinationally; written to
+        // fanout_packet_bits_r via non-blocking assignment in always_ff.
+        fanout_packet_tmp = message_packet_t'(fanout_packet_bits_r);
+        if (route_fanout_read_pending_r && fanout_read_rsp_valid_c)
+            fanout_packet_tmp.weight = WEIGHT_W'(fanout_read_rsp_weight_c);
     end
 
     assign fanout_ev.valid      = fanout_local_enqueue_valid_c;
@@ -704,8 +723,7 @@ module tile_fanout_executor
                     FANOUT_CORE_ID_W'(local_core_id_for_index(fanout_logical_idx_r));
                 fanout_route_weight_r <= fanout_read_rsp_weight_c;
                 fanout_route_valid_r <= fanout_read_rsp_valid_c;
-                fanout_packet_tmp = fanout_packet_bits_r;
-                fanout_packet_tmp.weight = fanout_read_rsp_weight_c[WEIGHT_W-1:0];
+                // fanout_packet_tmp is updated by always_comb above.
                 fanout_packet_bits_r <= fanout_packet_tmp;
             end
 

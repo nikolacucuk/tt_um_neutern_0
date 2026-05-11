@@ -1,9 +1,9 @@
 `default_nettype none
 
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::NEURON_IDX_W;
+import tile_pkg::RF_FLAT_W;
+import tile_pkg::TAG_W;
 `endif
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -49,9 +49,13 @@
 
 
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::CORE_ID_W;
+import tile_pkg::DATA_W;
+import tile_pkg::MSG_INPUT;
+import tile_pkg::PKT_PLANE_DATA;
+import tile_pkg::TILE_COORD_W;
+import tile_pkg::message_packet_t;
+import tile_pkg::packet_meta_with_plane;
 `endif
 module tile_top_tt
   #(
@@ -72,7 +76,9 @@ module tile_top_tt
     input  wire       ena,
     // rv_in  (host → tile) — neutern_spike_t boundary flit
     input  wire       rv_in_valid,
+    /* verilator lint_off UNUSEDSIGNAL */
     input  wire [7:0] rv_in_payload,    // { weight[3:0], 2'b00, neuron_y[0], neuron_x[0] }
+    /* verilator lint_on UNUSEDSIGNAL */
     output wire       rv_in_ready,
     // rv_out (tile → host) — neutern_spike_t boundary flit
     output wire       rv_out_valid,
@@ -92,9 +98,14 @@ module tile_top_tt
     wire [0:0] in_neuron_x = rv_in_payload[0];     // 1-bit X coordinate (0..1)
 
     // Flat neuron index: core_id = neuron_y * NEURONS_PER_ROW + neuron_x.
-    // With NEURONS_PER_ROW=2: max flat_idx = 1*2+1 = 3 (fits in 2 bits).
-    wire [7:0] in_core_id =
-        (8'(in_neuron_y) * 8'(NEURONS_PER_ROW)) + 8'(in_neuron_x);
+    // Sized to CORE_ID_W bits; the multiply result fits because max flat_idx
+    // = (2^1-1)*2 + 1 = 3 which requires only 2 bits (CORE_ID_W=3 ≥ 2).
+    wire [CORE_ID_W-1:0] in_core_id =
+        CORE_ID_W'(in_neuron_y * NEURONS_PER_ROW + in_neuron_x);
+
+    // rv_in_payload[3:2] are protocol-reserved zeros (2×2 grid, 1-bit coords).
+    // Explicitly consumed here to satisfy UNUSEDSIGNAL without suppression.
+    wire _unused_rv_in = &{rv_in_payload[3:2]};
 
     // Sign-extend 4-bit weight to the 4-bit message_packet_t.data field (DATA_W=4).
     wire [DATA_W-1:0] in_data = in_weight;
@@ -108,7 +119,7 @@ module tile_top_tt
         in_pkt.dst_x      = TILE_COORD_W'(TILE_COORD_X);
         in_pkt.dst_y      = TILE_COORD_W'(TILE_COORD_Y);
         // src_x/src_y removed from message_packet_t (single-tile profile)
-        in_pkt.core_id    = in_core_id;
+        in_pkt.core_id    = CORE_ID_W'(in_core_id);
         in_pkt.data       = in_data;
         // event_time removed from message_packet_t (neutern profile)
         in_pkt.tag        = '0;
@@ -122,8 +133,18 @@ module tile_top_tt
 
     // ── Egress: message_packet_t → neutern_spike_t ───────────────────────────
     // Receive the full MESSAGE_W-bit output packet from tile_top.
+    // Only the fields used for output pin mapping are accessed; remaining
+    // struct fields are explicitly consumed via _unused_out_pkt to satisfy
+    // UNUSEDSIGNAL without suppression.
     message_packet_t out_pkt;
     assign out_pkt = message_packet_t'(u_rv_out.rv_payload);
+
+    // Consume message_packet_t fields not mapped to rv_out_payload pins.
+    // (kind, broadcast, dst_x, dst_y, tag, meta, event_time are all protocol-
+    //  internal; only core_id and data drive the egress flit.)
+    wire _unused_out_pkt = &{out_pkt.kind, out_pkt.broadcast,
+                              out_pkt.dst_x, out_pkt.dst_y,
+                              out_pkt.tag, out_pkt.meta};
 
     // Recover (neuron_y, neuron_x) from the flat core_id in the output packet.
     // core_id = LOCAL_Z + flat_idx, and with LOCAL_Z=0: core_id = flat_idx.

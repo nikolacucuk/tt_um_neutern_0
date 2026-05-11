@@ -1,9 +1,9 @@
 `default_nettype none
 
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::NEURON_IDX_W;
+import tile_pkg::NEURON_UCODE_RSP_W;
+import tile_pkg::neuron_ucode_req_t;
 `endif
 // -----------------------------------------------------------------------------
 // logical_neuron_ucode_bank
@@ -41,7 +41,7 @@ module logical_neuron_ucode_bank #(
     input  wire [(NEURONS_PER_TILE <= 1) ? 0 : $clog2(NEURONS_PER_TILE)-1:0] write_neuron_idx,
     input  wire write_broadcast,          // 1 = write all neurons (shared / soft-reset)
     input  wire [4:0]  write_word_index,
-    input  wire [15:0] write_word,
+    input  wire [NEURON_UCODE_RSP_W-1:0] write_word,
     // ---- Read port: rv_if, single port, 3-cycle latency -------------------
     //   Request  payload : neuron_ucode_req_t  { logical_idx, word_index }
     //   Response payload : neuron_ucode_rsp_t  { word }
@@ -97,7 +97,7 @@ module logical_neuron_ucode_bank #(
     end
 
     // ---- Storage array ----------------------------------------------------
-    (* ram_style = "block" *) logic [15:0] ucode_words_r [0:UCODE_MEM_DEPTH-1];
+    (* ram_style = "block" *) logic [NEURON_UCODE_RSP_W-1:0] ucode_words_r [0:UCODE_MEM_DEPTH-1];
 
     initial begin
         for (int init_idx = 0; init_idx < UCODE_MEM_DEPTH; init_idx++)
@@ -119,8 +119,8 @@ module logical_neuron_ucode_bank #(
     logic                    read_valid_stage0_r;
     logic                    read_valid_stage1_r;
     logic                    read_valid_stage2_r;
-    logic [15:0]             read_word_stage1_r;
-    logic [15:0]             read_word_stage2_r;
+    logic [NEURON_UCODE_RSP_W-1:0] read_word_stage1_r;
+    logic [NEURON_UCODE_RSP_W-1:0] read_word_stage2_r;
     logic [UCODE_ADDR_W-1:0] read_addr_stage0_r;
 
     // Bank always accepts; caller may keep valid high for consecutive reads.
@@ -171,11 +171,8 @@ module logical_neuron_ucode_bank #(
     // Response: ready from tile_top is not back-pressured (pipeline fires
     // unconditionally once valid is asserted).
     assign read_rsp_port.valid      = read_valid_stage2_r;
-    // rv_payload width = $bits(neuron_ucode_rsp_t) = 16 bits at instantiation;
-    // WIDTH=1 in standalone lint is a known false positive for rv_if.tx ports.
-    /* verilator lint_off WIDTHTRUNC */
+    // rv_payload width = $bits(neuron_ucode_rsp_t) = NEURON_UCODE_RSP_W bits.
     assign read_rsp_port.rv_payload = read_word_stage2_r;
-    /* verilator lint_on WIDTHTRUNC */
 
 endmodule
 

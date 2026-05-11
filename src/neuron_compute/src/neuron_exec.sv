@@ -1,9 +1,21 @@
 `default_nettype none
 
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::DATA_W;
+import tile_pkg::NEURON_OP_W;
+import tile_pkg::NEURON_UCODE_RSP_W;
+import tile_pkg::OP_ACCUM_W;
+import tile_pkg::OP_EMIT;
+import tile_pkg::OP_INTEG;
+import tile_pkg::OP_LDI;
+import tile_pkg::OP_RECV;
+import tile_pkg::OP_RESET;
+import tile_pkg::OP_SPIKE_IF_GE;
+import tile_pkg::RF_COUNT;
+import tile_pkg::RF_FLAT_W;
+import tile_pkg::RF_REG_W;
+import tile_pkg::TAG_W;
+import tile_pkg::WEIGHT_W;
 `endif
 
 module neuron_exec (
@@ -11,7 +23,7 @@ module neuron_exec (
     input  wire [TAG_W-1:0]             exec_tag,
     input  wire [RF_FLAT_W-1:0]         rf_state_flat,
     input  wire signed [WEIGHT_W-1:0]   current_weight_value,
-    input  wire [15:0]                  instr_word,
+    input  wire [NEURON_UCODE_RSP_W-1:0]     instr_word,
     input  wire [TAG_W-1:0]             last_tag_r,
     input  wire cmp_ge_r,
     input  wire cmp_eq_r,

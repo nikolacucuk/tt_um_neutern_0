@@ -2,9 +2,32 @@
 
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::CONTEXT_COMMIT_W;
+import tile_pkg::EVENT_TIME_W;
+import tile_pkg::FANOUT_READ_RSP_W;
+import tile_pkg::FANOUT_SPIKE_W;
+import tile_pkg::NEURON_EMIT_W;
+import tile_pkg::NEURON_EXEC_CTX_W;
+import tile_pkg::NEURON_IDX_W;
+import tile_pkg::NEURON_LOCAL_W;
+import tile_pkg::NEURON_UCODE_REQ_W;
+import tile_pkg::NEURON_UCODE_RSP_W;
+import tile_pkg::RF_FLAT_W;
+import tile_pkg::TAG_W;
+import tile_pkg::TILE_COORD_W;
+import tile_pkg::TILE_EVENT_W;
+import tile_pkg::TILE_QUEUE_EVENT_W;
+import tile_pkg::WEIGHT_W;
+import tile_pkg::context_commit_t;
+import tile_pkg::message_packet_t;
+import tile_pkg::neuron_emit_t;
+import tile_pkg::neuron_exec_ctx_t;
+import tile_pkg::neuron_ucode_req_t;
+import tile_pkg::neuron_worker_event_t;
+import tile_pkg::neuron_worker_result_t;
+import tile_pkg::neuron_worker_start_t;
+import tile_pkg::tile_event_t;
+import tile_pkg::tile_queue_event_t;
 `endif
 module tile_top
   #(
@@ -276,7 +299,7 @@ module tile_top
     logic [7:0] state_dump_neuron_flags_c;
     logic [FANOUT_ADDR_W-1:0] state_dump_fanout_ptr_c;
     logic [FANOUT_ADDR_W-1:0] state_dump_fanout_len_c;
-    logic [23:0] state_reset_init_rf_flat_c;
+    logic [RF_FLAT_W-1:0] state_reset_init_rf_flat_c;
     // state_reset_last_event_time_c removed: timestamps eliminated
     // state_bank → scheduler (combinational soft-reset output from state_bank)
     wire  soft_reset_valid_sbank_c;
@@ -286,13 +309,13 @@ module tile_top
     wire  [NEURON_IDX_W-1:0] soft_reset_idx_c;
     wire  [NEURON_IDX_W-1:0] state_dispatch_read_idx_c;
 
-    logic [23:0] ctx_read_rf_state_flat_a_c;
+    logic [RF_FLAT_W-1:0] ctx_read_rf_state_flat_a_c;
     logic [TAG_W-1:0]          ctx_read_last_tag_a_c;
     // ctx_read_last_time_a_c removed: timestamps eliminated
     logic ctx_read_cmp_ge_a_c;
     logic ctx_read_cmp_eq_a_c;
     logic ctx_read_spike_flag_a_c;
-    logic [23:0] ctx_read_rf_state_flat_b_c;
+    logic [RF_FLAT_W-1:0] ctx_read_rf_state_flat_b_c;
     logic [TAG_W-1:0]          ctx_read_last_tag_b_c;
     // ctx_read_last_time_b_c removed: timestamps eliminated
     logic ctx_read_cmp_ge_b_c;
@@ -663,7 +686,7 @@ module tile_top
     logic [NEURON_IDX_W-1:0] ucode_write_neuron_idx_mux_c;
     logic ucode_write_broadcast_mux_c;
     logic [4:0] ucode_write_index_mux_c;
-    logic [15:0] ucode_write_word_mux_c;
+    logic [NEURON_UCODE_RSP_W-1:0] ucode_write_word_mux_c;
     logic ucode_prog_en_mux_c;
     logic [NEURON_IDX_W-1:0] ucode_prog_neuron_idx_mux_c;
     logic ucode_prog_broadcast_mux_c;

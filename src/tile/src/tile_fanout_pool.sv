@@ -1,9 +1,12 @@
 `default_nettype none
 
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::CORE_ID_W;
+import tile_pkg::DATA_W;
+import tile_pkg::TILE_COORD_W;
+import tile_pkg::WEIGHT_W;
+import tile_pkg::fanout_read_rsp_t;
+import tile_pkg::fanout_write_req_t;
 `endif
 
 // -----------------------------------------------------------------------------

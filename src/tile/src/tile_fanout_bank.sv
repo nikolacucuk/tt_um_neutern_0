@@ -1,9 +1,9 @@
 `default_nettype none
 
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::DATA_W;
+import tile_pkg::FANOUT_SPIKE_W;
+import tile_pkg::tile_fanout_spike_t;
 `endif
 
 // -----------------------------------------------------------------------------
@@ -103,8 +103,7 @@ module tile_fanout_bank #(
         .waitrequest(mem_stall)
     );
 
-    // mem_stall: waitrequest is always 0 for STYLE_HINT=3 (synchronous macros).
-    assign mem_stall = 1'b0;
+    // mem_stall: driven by coldfoot_mem_bytelane_sync.waitrequest (always 0 for STYLE_HINT=3).
 
     // ── Per-worker FIFO state ─────────────────────────────────────────────────
     logic [PTR_W-1:0]  head_r         [0:W-1];
@@ -182,14 +181,12 @@ module tile_fanout_bank #(
     // Refill reads take priority; only issue a new read when the pipeline
     // is not already occupied (rd_inflight_valid_r == 0).
     always_comb begin : rd_arb
-        int w;
         rd_grant_c       = '0;
         rd_grant_valid_c = 1'b0;
         if (!rd_inflight_valid_r) begin
             for (int i = 0; i < W; i++) begin
-                w = (int'(rr_rd_r) + i) % W;
-                if (refill_want_c[w] && !rd_grant_valid_c) begin
-                    rd_grant_c       = WIDX_W'(w);
+                if (refill_want_c[(int'(rr_rd_r) + i) % W] && !rd_grant_valid_c) begin
+                    rd_grant_c       = WIDX_W'((int'(rr_rd_r) + i) % W);
                     rd_grant_valid_c = 1'b1;
                 end
             end

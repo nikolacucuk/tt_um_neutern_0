@@ -20,9 +20,48 @@
 //                         enqueued only after a header has been accepted
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::CMD_CSR;
+import tile_pkg::CMD_DEBUG;
+import tile_pkg::CMD_DUMP;
+import tile_pkg::CMD_ROUTE;
+import tile_pkg::CMD_SYNAPSE;
+import tile_pkg::CMD_UCODE;
+import tile_pkg::CMD_WEIGHT;
+import tile_pkg::CORE_ID_W;
+import tile_pkg::DATA_W;
+import tile_pkg::HWINFO_MAGIC_LO;
+import tile_pkg::MESSAGE_CORE_BCAST;
+import tile_pkg::MESSAGE_PKT_MIN_W;
+import tile_pkg::MSG_INPUT;
+import tile_pkg::MSG_PING;
+import tile_pkg::MSG_PONG;
+import tile_pkg::MSG_PROG_BEGIN;
+import tile_pkg::MSG_PROG_END;
+import tile_pkg::MSG_PROG_WORD;
+import tile_pkg::MSG_READ;
+import tile_pkg::MSG_READ_RSP;
+import tile_pkg::MSG_SPIKE;
+import tile_pkg::MSG_STATUS;
+import tile_pkg::MSG_STATUS_BAD_ADDR;
+import tile_pkg::MSG_STATUS_BAD_CORE;
+import tile_pkg::MSG_STATUS_BAD_KIND;
+import tile_pkg::MSG_STATUS_OK;
+import tile_pkg::MSG_WRITE;
+import tile_pkg::NEURON_IDX_W;
+import tile_pkg::NEURON_LOCAL_W;
+import tile_pkg::NEURON_UCODE_RSP_W;
+import tile_pkg::PKT_PLANE_CMD;
+import tile_pkg::PONG_META_TILE;
+import tile_pkg::TILE_COORD_W;
+import tile_pkg::TILE_HEALTH_ALIVE;
+import tile_pkg::TILE_HEALTH_ENABLED;
+import tile_pkg::WEIGHT_W;
+import tile_pkg::fanout_write_req_t;
+import tile_pkg::message_packet_min_t;
+import tile_pkg::message_packet_t;
+import tile_pkg::packet_meta_with_plane;
+import tile_pkg::tile_spike_flat_core_id;
+import tile_pkg::tile_spike_flat_idx;
 `endif
 module tile_ingress
   #(
@@ -213,7 +252,7 @@ module tile_ingress
             pkt_status.dst_y = '0;
             // src_x / src_y removed: single-tile neutern profile
             pkt_status.core_id = req_stat.core_id;
-            pkt_status.data = status_code;
+            pkt_status.data = DATA_W'(status_code);
             // data_hi removed
             pkt_status.meta = packet_meta_with_plane(8'h00, PKT_PLANE_CMD);
             make_status_packet = pkt_status;
@@ -234,7 +273,7 @@ module tile_ingress
             pkt_pong.core_id = CORE_ID_W'(LOCAL_Z);
             pkt_pong.prog_index = 5'd0;
             pkt_pong.addr = 4'd0;
-            pkt_pong.data = HWINFO_MAGIC_LO;
+            pkt_pong.data = DATA_W'(HWINFO_MAGIC_LO);
             // data_hi removed; only HWINFO low nibble returned
             pkt_pong.sid = '0;
             pkt_pong.tag = '0;
@@ -541,7 +580,7 @@ module tile_ingress
         ctrl_write_neuron_idx_mux = selected_target_idx;
         ctrl_write_broadcast_mux  = current_core_broadcast;
         ctrl_write_addr_mux = current_packet_c.addr;
-        ctrl_write_data_mux = current_packet_c.data;
+        ctrl_write_data_mux = 8'(current_packet_c.data);
         ucode_write_en_mux =
             (current_packet_valid &&
              current_local_tile_match &&

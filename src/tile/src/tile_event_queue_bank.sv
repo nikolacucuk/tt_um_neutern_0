@@ -1,9 +1,8 @@
 `default_nettype none
 
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::DATA_W;
+import tile_pkg::tile_queue_event_t;
 `endif
 
 // -----------------------------------------------------------------------------

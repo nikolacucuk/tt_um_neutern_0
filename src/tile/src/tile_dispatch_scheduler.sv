@@ -31,9 +31,15 @@
 // FIFO + 128-wide priority encoder is O(log N) depth and ~10x smaller.
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::EVENT_TIME_W;
+import tile_pkg::NEURON_EMIT_W;
+import tile_pkg::NEURON_EXEC_CTX_W;
+import tile_pkg::NEURON_IDX_W;
+import tile_pkg::TAG_W;
+import tile_pkg::WEIGHT_W;
+import tile_pkg::context_commit_t;
+import tile_pkg::neuron_emit_t;
+import tile_pkg::neuron_exec_ctx_t;
 `endif
 module tile_dispatch_scheduler
   #(
@@ -277,7 +283,7 @@ module tile_dispatch_scheduler
             found_fw = 1'b0;
             find_worker_rr = start_idx;
             for (k_fw = 0; k_fw < WORKER_CORES_PER_TILE; k_fw = k_fw + 1) begin
-                probe = (start_idx + k_fw) % WORKER_CORES_PER_TILE;
+                probe = (int'(start_idx) + k_fw) % WORKER_CORES_PER_TILE;
                 if (!found_fw && ready_mask[probe[WORKER_IDX_W-1:0]]) begin
                     found_fw = 1'b1;
                     find_worker_rr = probe[WORKER_IDX_W-1:0];
@@ -679,6 +685,17 @@ module tile_dispatch_scheduler
             end
         end
 
+        // Stage-B in_ready_fifo masks: computed combinationally so the
+        // sequential block only needs a single non-blocking assignment.
+        stb_pop_clear_mask = '0;
+        if (ready_pop_c) begin
+            stb_pop_clear_mask[ready_head_idx_c] = 1'b1;
+        end
+        stb_keep_mask = in_ready_fifo_r & ~stb_pop_clear_mask;
+        if (soft_reset_valid_r) begin
+            stb_keep_mask[soft_reset_idx_r] = 1'b0;
+        end
+
         // Scalar edge detect: the head neuron changed (or FIFO went empty→full).
         // prev_pending_{valid,idx}_r are updated in the sequential block.
         pending_edge_c =
@@ -856,17 +873,8 @@ module tile_dispatch_scheduler
             pop_reservation_idx_r   <= ready_head_idx_c;
 
             // --- Stage B: apply the previously-registered push ---
-            // Stage-B in_ready_fifo_r: scalar soft-reset clear replaces
-            // N-wide AND with ~soft_reset_pulse.
+            // stb_pop_clear_mask / stb_keep_mask are driven by always_comb above.
             begin : stage_b_ready_fifo_update
-                stb_pop_clear_mask = '0;
-                if (ready_pop_c) begin
-                    stb_pop_clear_mask[ready_head_idx_c] = 1'b1;
-                end
-                stb_keep_mask = in_ready_fifo_r & ~stb_pop_clear_mask;
-                if (soft_reset_valid_r) begin
-                    stb_keep_mask[soft_reset_idx_r] = 1'b0;
-                end
                 in_ready_fifo_r <= stb_keep_mask | pending_push_mask_c;
             end
             if (ready_pop_c) begin

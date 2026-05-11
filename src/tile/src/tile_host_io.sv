@@ -17,9 +17,23 @@
 //   * runtime emits are one-shot guarded against a stuck worker_commit_valid
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::CMD_DUMP;
+import tile_pkg::CMD_MESSAGE;
+import tile_pkg::CORE_ID_W;
+import tile_pkg::DATA_W;
+import tile_pkg::META_W;
+import tile_pkg::MSG_OUTPUT;
+import tile_pkg::MSG_READ_RSP;
+import tile_pkg::MSG_SID_W;
+import tile_pkg::NEURON_IDX_W;
+import tile_pkg::PKT_PLANE_DATA;
+import tile_pkg::TAG_W;
+import tile_pkg::TILE_COORD_W;
+import tile_pkg::WEIGHT_W;
+import tile_pkg::fanout_read_rsp_t;
+import tile_pkg::message_packet_t;
+import tile_pkg::neuron_emit_t;
+import tile_pkg::packet_meta_with_plane;
 `endif
 module tile_host_io
   #(
@@ -233,7 +247,7 @@ module tile_host_io
         message_packet_t pkt_ucode;
         begin
             pkt_ucode = make_read_rsp_packet(request);
-            pkt_ucode.data = word[7:0];
+            pkt_ucode.data = DATA_W'(word);
             // data_hi removed from message_packet_t (DATA_W narrowed, neutern lean)
             make_ucode_host_response_packet = pkt_ucode;
         end
@@ -249,7 +263,7 @@ module tile_host_io
         message_packet_t pkt_route;
         begin
             pkt_route = make_read_rsp_packet(request);
-            pkt_route.data = dst_x;
+            pkt_route.data = DATA_W'(dst_x);
             // data_hi removed from message_packet_t (neutern lean profile)
             pkt_route.core_id = CORE_ID_W'(core_id);
             pkt_route.meta = {(META_W-1)'(0), rhr_valid};
@@ -259,12 +273,12 @@ module tile_host_io
 
     function automatic message_packet_t make_weight_host_response_packet(
         input message_packet_t request,
-        input logic signed [7:0] weight
+        input logic signed [WEIGHT_W-1:0] weight
     );
         message_packet_t pkt_weight;
         begin
             pkt_weight = make_read_rsp_packet(request);
-            pkt_weight.data = weight[7:0];
+            pkt_weight.data = DATA_W'(weight);
             // data_hi removed from message_packet_t (neutern lean profile)
             make_weight_host_response_packet = pkt_weight;
         end
@@ -282,7 +296,7 @@ module tile_host_io
             pkt_dump.cmd_kind = CMD_DUMP;
             pkt_dump.prog_index = frame_index;
             pkt_dump.addr = {1'b0, section};
-            pkt_dump.data = payload[7:0];
+            pkt_dump.data = DATA_W'(payload);
             // data_hi removed from message_packet_t (neutern lean profile)
             pkt_dump.meta = payload[23:16];
             // event_time removed from message_packet_t (neutern profile)
@@ -297,7 +311,7 @@ module tile_host_io
     function automatic message_packet_t make_runtime_packet(
         input logic [NEURON_IDX_W-1:0] logical_idx,
         input logic [3:0]              kind,
-        input logic [7:0]              emit_data
+        input logic [DATA_W-1:0]       emit_data
         // event_time removed: neutern does not use temporal event ordering
     );
         message_packet_t pkt_rt;
@@ -312,9 +326,9 @@ module tile_host_io
             pkt_rt.dst_y = '0;
             // src_x / src_y removed: single-tile neutern profile
             pkt_rt.core_id  = local_core_id;
-            pkt_rt.data     = emit_data;
+            pkt_rt.data     = DATA_W'(emit_data);
             pkt_rt.sid      = local_core_id[MSG_SID_W-1:0];
-            pkt_rt.tag      = emit_data[TAG_W+4:5];  // bits [5+TAG_W-1:5]
+            pkt_rt.tag      = TAG_W'(0);  // lean profile: no tag in 4-bit emit_data
             pkt_rt.weight   = '0;
             pkt_rt.meta     = packet_meta_with_plane(8'h00, PKT_PLANE_DATA);
             make_runtime_packet = pkt_rt;
@@ -425,7 +439,7 @@ module tile_host_io
     logic [NEURON_IDX_W-1:0] fanout_bank_port0_neuron_idx_c;
     logic [FANOUT_ADDR_W-1:0] fanout_bank_port0_index_c;
 
-    logic signed [7:0] weight_host_read_value_c;
+    logic signed [WEIGHT_W-1:0] weight_host_read_value_c;
     logic [FANOUT_DST_X_W-1:0]  route_host_read_dst_x_c;
     logic [FANOUT_DST_Y_W-1:0]  route_host_read_dst_y_c;
     logic [FANOUT_CORE_ID_W-1:0] route_host_read_core_id_c;
@@ -609,8 +623,34 @@ module tile_host_io
     // behaviour of the original tile_top always_ff block for
     // the host_*/dump_* registers.
     // ---------------------------------------------------------------------
+    // dump_csr_payload_c: combinational builder driven by current dump state
+    // registers.  Computed every cycle; used by the sequential block when the
+    // DUMP_STATE_STATE condition is met.
     logic [31:0] dump_csr_payload_c;
-    logic [23:0] dump_init_rf_c;
+    always_comb begin
+        case (dump_frame_idx_r)
+            5'd0: dump_csr_payload_c = {
+                fanout_count_low8(state_dump_fanout_len),
+                {3'b000, state_dump_ucode_len},
+                {3'b000, state_dump_ucode_ptr},
+                {3'b000, noc_egress_en_bus[dump_target_idx_r],
+                 host_egress_en_bus[dump_target_idx_r], 3'b000}
+            };
+            5'd1: dump_csr_payload_c = {
+                state_dump_init_rf_flat[23:16],  // rf[2]=AUX
+                8'h00,                           // last_time eliminated
+                state_dump_init_rf_flat[15:8],
+                state_dump_init_rf_flat[7:0]
+            };
+            5'd2: dump_csr_payload_c = {
+                16'd0,
+                fanout_base_low8(state_dump_fanout_ptr),
+                state_dump_neuron_flags
+            };
+            default: dump_csr_payload_c = 32'd0;  // rf[3] eliminated, no extra byte
+        endcase
+    end
+
     always_ff @(posedge clk) begin
         if (!rst_n || graph_state_clear) begin
             host_pending_valid_r <= 1'b0;
@@ -718,28 +758,7 @@ module tile_host_io
                     end
                     DUMP_STATE_STATE: begin
                         if (!host_pending_valid_r || rv_host_out_ready) begin
-                            dump_init_rf_c = state_dump_init_rf_flat;
-                            case (dump_frame_idx_r)
-                                5'd0: dump_csr_payload_c = {
-                                    fanout_count_low8(state_dump_fanout_len),
-                                    {3'b000, state_dump_ucode_len},
-                                    {3'b000, state_dump_ucode_ptr},
-                                    {3'b000, noc_egress_en_bus[dump_target_idx_r],
-                                     host_egress_en_bus[dump_target_idx_r], 3'b000}
-                                };
-                                5'd1: dump_csr_payload_c = {
-                                    dump_init_rf_c[23:16],  // rf[2]=AUX
-                                    8'h00,                  // last_time eliminated
-                                    dump_init_rf_c[15:8],
-                                    dump_init_rf_c[7:0]
-                                };
-                                5'd2: dump_csr_payload_c = {
-                                    16'd0,
-                                    fanout_base_low8(state_dump_fanout_ptr),
-                                    state_dump_neuron_flags
-                                };
-                                default: dump_csr_payload_c = 32'd0;  // rf[3] eliminated, no extra byte
-                            endcase
+                            // dump_csr_payload_c is driven by always_comb above.
                             host_pending_valid_r <= 1'b1;
                             host_pending_payload_r <= make_dump_rsp_packet(
                                 message_packet_t'(dump_request_r),

@@ -2,9 +2,22 @@
 
 
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::CSR_CTRL;
+import tile_pkg::CSR_CTRL_HOST_EGRESS_BIT;
+import tile_pkg::CSR_CTRL_NOC_EGRESS_BIT;
+import tile_pkg::CSR_CTRL_SOFT_RESET_BIT;
+import tile_pkg::CSR_INIT_T01;
+import tile_pkg::CSR_INIT_TR;
+import tile_pkg::CSR_INIT_VI;
+import tile_pkg::CSR_INIT_WAUX;
+import tile_pkg::CSR_NEURON_META;
+import tile_pkg::CSR_RESET_TRIGGER;
+import tile_pkg::CSR_RESET_TRIGGER_SOFT_RESET_BIT;
+import tile_pkg::CSR_UCODE_LEN;
+import tile_pkg::CSR_UCODE_PTR;
+import tile_pkg::CSR_VEC_BASE_01;
+import tile_pkg::CSR_VEC_BASE_23;
+import tile_pkg::DATA_W;
 `endif
 module logical_neuron_state_bank_packed_bram
   #(
@@ -159,7 +172,7 @@ module logical_neuron_state_bank
     // Always 0 (FF path).
     output logic mem_stall
 );
-    localparam int unsigned NEURON_IDX_W =
+    localparam int unsigned SBANK_NEURON_IDX_W =
         (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE);
     localparam int unsigned FANOUT_PTR_W =
         (FANOUT_POOL_DEPTH <= 1) ? 1 : $clog2(FANOUT_POOL_DEPTH);
@@ -231,11 +244,11 @@ module logical_neuron_state_bank
     logic state_epoch_r;
     logic [NEURONS_PER_TILE-1:0] state_epoch_seen_r;
     logic csr_selected_valid_c;
-    logic [NEURON_IDX_W-1:0] csr_selected_idx_c;
+    logic [SBANK_NEURON_IDX_W-1:0] csr_selected_idx_c;
     logic ucode_prog_selected_valid_c;
-    logic [NEURON_IDX_W-1:0] ucode_prog_selected_idx_c;
+    logic [SBANK_NEURON_IDX_W-1:0] ucode_prog_selected_idx_c;
     logic fanout_prog_selected_valid_c;
-    logic [NEURON_IDX_W-1:0] fanout_prog_selected_idx_c;
+    logic [SBANK_NEURON_IDX_W-1:0] fanout_prog_selected_idx_c;
     logic csr_write_hit_c;
     // CSR_RESET_TRIGGER drain queue.  A broadcast write to this addr
     // ORs `csr_write_mask` into `reset_drain_mask_r`; a one-hot pulse
@@ -248,34 +261,34 @@ module logical_neuron_state_bank
     logic [NEURONS_PER_TILE-1:0] reset_drain_pulse_c;
     logic                        reset_drain_pulse_valid_c;
     logic                        reset_drain_emit_c;
-    logic [NEURON_IDX_W-1:0]     drain_idx_c;
+    logic [SBANK_NEURON_IDX_W-1:0]     drain_idx_c;
     logic                        drain_valid_c;
     logic                        soft_reset_valid_next_c;
-    logic [NEURON_IDX_W-1:0]     soft_reset_idx_next_c;
+    logic [SBANK_NEURON_IDX_W-1:0]     soft_reset_idx_next_c;
     logic [NEURONS_PER_TILE-1:0] reset_trigger_mask_or_c;
     logic [NEURONS_PER_TILE-1:0] soft_reset_pulse_next_c;
     logic [NEURONS_PER_TILE-1:0] state_epoch_write_mask_c;
     logic ucode_ptr_wr_en_c;
-    logic [NEURON_IDX_W-1:0] ucode_ptr_wr_idx_c;
+    logic [SBANK_NEURON_IDX_W-1:0] ucode_ptr_wr_idx_c;
     logic [4:0] ucode_ptr_wr_data_c;
     logic ucode_len_wr_en_c;
-    logic [NEURON_IDX_W-1:0] ucode_len_wr_idx_c;
+    logic [SBANK_NEURON_IDX_W-1:0] ucode_len_wr_idx_c;
     logic [4:0] ucode_len_wr_data_c;
     logic fanout_ptr_wr_en_c;
-    logic [NEURON_IDX_W-1:0] fanout_ptr_wr_idx_c;
+    logic [SBANK_NEURON_IDX_W-1:0] fanout_ptr_wr_idx_c;
     logic [FANOUT_PTR_W-1:0] fanout_ptr_wr_data_c;
     logic fanout_len_wr_en_c;
-    logic [NEURON_IDX_W-1:0] fanout_len_wr_idx_c;
+    logic [SBANK_NEURON_IDX_W-1:0] fanout_len_wr_idx_c;
     logic [FANOUT_PTR_W-1:0] fanout_len_wr_data_c;
 
     logic dispatch_bram_wr_en_c;
-    logic [NEURON_IDX_W-1:0] dispatch_bram_wr_addr_c;
+    logic [SBANK_NEURON_IDX_W-1:0] dispatch_bram_wr_addr_c;
     logic [DISPATCH_BRAM_W-1:0] dispatch_bram_wr_data_c;
     logic [DISPATCH_BRAM_BYTES-1:0] dispatch_bram_wr_mask_c;
     logic [DISPATCH_BRAM_W-1:0] dispatch_bram_rd_data;
 
     logic fanout_bram_wr_en_c;
-    logic [NEURON_IDX_W-1:0] fanout_bram_wr_addr_c;
+    logic [SBANK_NEURON_IDX_W-1:0] fanout_bram_wr_addr_c;
     logic [FANOUT_BRAM_W-1:0] fanout_bram_wr_data_c;
     logic [FANOUT_BRAM_BYTES-1:0] fanout_bram_wr_mask_c;
     logic [FANOUT_BRAM_W-1:0] fanout_bram_rd_data;
@@ -285,19 +298,19 @@ module logical_neuron_state_bank
     logic [FANOUT_PTR_BYTES*8-1:0] fanout_compact_len;
 
     logic dump_bram_wr_en_c;
-    logic [NEURON_IDX_W-1:0] dump_bram_wr_addr_c;
+    logic [SBANK_NEURON_IDX_W-1:0] dump_bram_wr_addr_c;
     logic [DUMP_BRAM_W-1:0] dump_bram_wr_data_c;
     logic [DUMP_BRAM_BYTES-1:0] dump_bram_wr_mask_c;
     logic [DUMP_BRAM_W-1:0] dump_bram_rd_data;
 
     logic target_bram_wr_en_c;
-    logic [NEURON_IDX_W-1:0] target_bram_wr_addr_c;
+    logic [SBANK_NEURON_IDX_W-1:0] target_bram_wr_addr_c;
     logic [TARGET_BRAM_W-1:0] target_bram_wr_data_c;
     logic [TARGET_BRAM_BYTES-1:0] target_bram_wr_mask_c;
     logic [TARGET_BRAM_W-1:0] target_bram_rd_data;
 
     logic reset_bram_wr_en_c;
-    logic [NEURON_IDX_W-1:0] reset_bram_wr_addr_c;
+    logic [SBANK_NEURON_IDX_W-1:0] reset_bram_wr_addr_c;
     logic [RESET_BRAM_W-1:0] reset_bram_wr_data_c;
     logic [RESET_BRAM_BYTES-1:0] reset_bram_wr_mask_c;
     logic [RESET_BRAM_W-1:0] reset_bram_rd_data;
@@ -313,7 +326,7 @@ module logical_neuron_state_bank
     logic [FANOUT_PTR_BYTES*8-1:0] fanout_ptr_wr_padded_c;
     logic [FANOUT_PTR_BYTES*8-1:0] fanout_len_wr_padded_c;
 
-    function automatic [NEURON_IDX_W-1:0] first_hot_idx_removed_placeholder(
+    function automatic [SBANK_NEURON_IDX_W-1:0] first_hot_idx_removed_placeholder(
         input logic [0:0] dummy, output logic found
     );
         begin first_hot_idx_removed_placeholder = '0; found = 1'b0; end
@@ -342,7 +355,7 @@ module logical_neuron_state_bank
         drain_valid_c = 1'b0;
         for (int d = 0; d < NEURONS_PER_TILE; d = d + 1) begin
             if (!drain_valid_c && reset_drain_mask_r[d]) begin
-                drain_idx_c   = NEURON_IDX_W'(d);
+                drain_idx_c   = SBANK_NEURON_IDX_W'(d);
                 drain_valid_c = 1'b1;
             end
         end
@@ -721,7 +734,7 @@ module logical_neuron_state_bank
         logic [RESET_BRAM_W-1:0]            reset_bram_rd_data_r;
 
         // Combinational read address: select by current phase.
-        logic [NEURON_IDX_W-1:0] mem_rd_addr_c;
+        logic [SBANK_NEURON_IDX_W-1:0] mem_rd_addr_c;
         always_comb begin
             case (rd_phase_r)
                 3'd0: mem_rd_addr_c = dispatch_read_idx;
@@ -745,7 +758,7 @@ module logical_neuron_state_bank
         logic [STATE_ROW_W-1:0]   mem_wr_data_c;
         logic [STATE_ROW_BYTES-1:0] mem_wr_mask_c;
         logic                     mem_wr_en_c;
-        logic [NEURON_IDX_W-1:0]  mem_wr_addr_c;
+        logic [SBANK_NEURON_IDX_W-1:0]  mem_wr_addr_c;
 
         always_comb begin : mem_write_merge
             mem_wr_data_c = '0;

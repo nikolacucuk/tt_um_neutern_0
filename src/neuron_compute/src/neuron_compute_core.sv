@@ -2,9 +2,18 @@
 
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
-/* verilator lint_off IMPORTSTAR */
-import tile_pkg::*;
-/* verilator lint_on IMPORTSTAR */
+import tile_pkg::DATA_W;
+import tile_pkg::NEURON_IDX_W;
+import tile_pkg::NEURON_UCODE_REQ_W;
+import tile_pkg::NEURON_UCODE_RSP_W;
+import tile_pkg::PROG_IDX_W;
+import tile_pkg::RF_FLAT_W;
+import tile_pkg::TAG_W;
+import tile_pkg::WEIGHT_W;
+import tile_pkg::neuron_ucode_req_t;
+import tile_pkg::neuron_ucode_rsp_t;
+import tile_pkg::neuron_worker_result_t;
+import tile_pkg::neuron_worker_start_t;
 `endif
 module neuron_compute_core
   #(
@@ -83,9 +92,9 @@ module neuron_compute_core
     reg [LOGICAL_IDX_W-1:0] logical_idx_r;
     // Event-input registers: fixed for the duration of one dispatch.
     reg [4:0] work_event_sid_r;
-    reg [1:0] work_event_tag_r;
+    reg [TAG_W-1:0] work_event_tag_r;
     // Timestamps removed: neutern does not use event-time ordering.
-    reg signed [7:0] work_weight_value_r;
+    reg signed [WEIGHT_W-1:0] work_weight_value_r;
     // Instruction-pointer / sequencing registers.
     reg [4:0] work_pc_r;
     reg [5:0] work_remaining_r;
@@ -103,7 +112,7 @@ module neuron_compute_core
     // Neuron_exec reads these at exec_step_c and the result is clocked back
     // in at exec_capture_c.  Timestamps removed — saves 4×6=24 FFs.
     reg [RF_FLAT_W-1:0] exec_rf_state_flat_r;
-    reg [1:0] exec_last_tag_r;
+    reg [TAG_W-1:0] exec_last_tag_r;
     reg exec_cmp_ge_r;
     reg exec_cmp_eq_r;
     reg exec_spike_flag_r;
@@ -128,7 +137,7 @@ module neuron_compute_core
     wire run_enabled_c;
     wire start_fetch_c;
     wire [RF_FLAT_W-1:0] rf_next_flat_c;
-    wire [1:0] last_tag_next_c;
+    wire [TAG_W-1:0] last_tag_next_c;
     wire cmp_ge_next_c;
     wire cmp_eq_next_c;
     wire spike_flag_next_c;
@@ -185,7 +194,7 @@ module neuron_compute_core
         .exec_tag(work_event_tag_r),
         .rf_state_flat(exec_rf_state_flat_r),
         .current_weight_value(work_weight_value_r),
-        .instr_word(exec_instr_word_c),
+        .instr_word({{(16-NEURON_UCODE_RSP_W){1'b0}}, exec_instr_word_c}),
         .last_tag_r(exec_last_tag_r),
         .cmp_ge_r(exec_cmp_ge_r),
         .cmp_eq_r(exec_cmp_eq_r),
