@@ -12,7 +12,6 @@ src/user_config.json
 src/config_merged.json
 test/sim_build
 test/__pycache__/
-test/results.xml
 test/gate_level_netlist.v
 .devcontainer/devcontainer-lock.json
 docs/logical_neuron_context_bank_architecture.md
@@ -56,9 +55,7 @@ src/*/formal/**/
 # ── Python cache ──────────────────────────────────────────────────────────────
 **/__pycache__/
 **/*.pyc
-tt.cmd
-tt.ps1
-tt/
+
 .devcontainer/devcontainer.json
 .devcontainer/devcontainer.json
 src/fusesoc.conf

@@ -9,9 +9,23 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install iverilog
-        shell: bash
-        run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Cache Verilator 5.036
+        id: cache-verilator
+        uses: actions/cache@v4
+        with:
+          path: /opt/verilator
+          key: verilator-5.036-ubuntu24
+
+      - name: Build Verilator 5.036
+        if: steps.cache-verilator.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get install -y git make autoconf g++ flex bison libfl2 libfl-dev
+          git clone --depth 1 --branch v5.036 https://github.com/verilator/verilator /tmp/verilator_src
+          cd /tmp/verilator_src && autoconf && ./configure --prefix=/opt/verilator
+          make -j$(nproc) && sudo make install
+
+      - name: Add Verilator to PATH
+        run: echo "/opt/verilator/bin" >> $GITHUB_PATH
 
       # Set Python up and install cocotb
       - name: Setup python
@@ -27,7 +41,7 @@ jobs:
         run: |
           cd test
           make clean
-          make
+          make SIM=verilator WAVES=0
           # make will return success even if the test fails, so check for failure in the results.xml
           ! grep failure results.xml
 

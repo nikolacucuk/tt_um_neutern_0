@@ -163,7 +163,7 @@ module tile_fanout_bank #(
         wr_grant_c       = '0;
         wr_grant_valid_c = 1'b0;
         for (i = 0; i < W; i++) begin
-            automatic int w = (int'(rr_wr_r) + i) % W;
+            w = (int'(rr_wr_r) + i) % W;
             if (push_want_c[w] && !wr_grant_valid_c) begin
                 wr_grant_c       = WIDX_W'(w);
                 wr_grant_valid_c = 1'b1;
@@ -183,7 +183,7 @@ module tile_fanout_bank #(
         rd_grant_valid_c = 1'b0;
         if (!rd_inflight_valid_r) begin
             for (i = 0; i < W; i++) begin
-                automatic int w = (int'(rr_rd_r) + i) % W;
+                w = (int'(rr_rd_r) + i) % W;
                 if (refill_want_c[w] && !rd_grant_valid_c) begin
                     rd_grant_c       = WIDX_W'(w);
                     rd_grant_valid_c = 1'b1;
