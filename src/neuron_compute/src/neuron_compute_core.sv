@@ -1,8 +1,11 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 (* keep_hierarchy = "no" *)
-module neuron_compute_core #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module neuron_compute_core
+  #(
     parameter int unsigned LOGICAL_IDX_W = 1
 ) (
     input  wire clk,

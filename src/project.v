@@ -76,11 +76,13 @@ module tt_um_neutern_0 (
   assign uio_out = {6'b0, rv_out_valid_w, rv_in_ready_w};    // [7:2]=0(unused) [1]=rv_out.valid [0]=rv_in.ready
   assign uo_out  = rv_out_payload_w;
 
+  // Parameter values mirror tt_um_neutern_pkg constants (kept in sync manually).
+  // Literals used here so project.v is self-contained for Yosys port-checking.
   tile_top_tt #(
-      .NEURONS_PER_TILE      (tt_um_neutern_pkg::NEUTERN_NEURONS_PER_TILE),
-      .WORKER_CORES_PER_TILE (tt_um_neutern_pkg::NEUTERN_WORKER_CORES),
-      .FANOUT_POOL_DEPTH     (tt_um_neutern_pkg::NEUTERN_FANOUT_POOL_DEPTH),
-      .NEURONS_PER_ROW       (tt_um_neutern_pkg::NEUTERN_NEURONS_X)
+      .NEURONS_PER_TILE      (4),   // tt_um_neutern_pkg::NEUTERN_NEURONS_PER_TILE
+      .WORKER_CORES_PER_TILE (1),   // tt_um_neutern_pkg::NEUTERN_WORKER_CORES
+      .FANOUT_POOL_DEPTH     (4),   // tt_um_neutern_pkg::NEUTERN_FANOUT_POOL_DEPTH
+      .NEURONS_PER_ROW       (2)    // tt_um_neutern_pkg::NEUTERN_NEURONS_X
   ) u_tile (
       .clk                   (clk),
       .rst_n                 (rst_n),

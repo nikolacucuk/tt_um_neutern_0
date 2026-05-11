@@ -1,8 +1,11 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 (* keep_hierarchy = "no" *)
-module tile_top #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module tile_top
+  #(
     parameter int unsigned TILE_COORD_X = 0,
     parameter int unsigned TILE_COORD_Y = 0,
     parameter int unsigned LOCAL_Z = 0,
@@ -330,8 +333,8 @@ module tile_top #(
     logic [WORKER_CORES_PER_TILE-1:0] worker_ucode_read_word_valid_c;
     logic [15:0] worker_ucode_read_word_c [0:WORKER_CORES_PER_TILE-1];
     // rv_if channels for the shared ucode bank single read port.
-    rv_if #(.WIDTH($bits(neuron_ucode_req_t))) ucode_bank_req_if();
-    rv_if #(.WIDTH($bits(neuron_ucode_rsp_t))) ucode_bank_rsp_if();
+    rv_if #(.WIDTH(NEURON_UCODE_REQ_W)) ucode_bank_req_if();
+    rv_if #(.WIDTH(NEURON_UCODE_RSP_W)) ucode_bank_rsp_if();
     // Port-0 ucode aux request fields now come out of u_host_io.
     wire port0_ucode_aux_req_c;
     wire port0_ucode_aux_is_dump_c;
@@ -739,7 +742,7 @@ module tile_top #(
             : worker_ucode_read_word_index_c[0]
     };
     assign ucode_bank_req_if.rv_payload =
-        $bits(neuron_ucode_req_t)'(ucode_bank_req_payload_c);
+        NEURON_UCODE_REQ_W'(ucode_bank_req_payload_c);
 
     // Worker-0 response: suppress when host_io's aux pipeline owns the slot.
     assign worker_ucode_read_word_valid_c[0] =
@@ -1332,10 +1335,10 @@ module tile_top #(
     );
 
     // ── Compute core interface channels ───────────────────────────────────────
-    rv_if #(.WIDTH($bits(neuron_worker_start_t)))  worker_start_if();
-    rv_if #(.WIDTH($bits(neuron_ucode_req_t)))     ucode_read_if();
-    rv_if #(.WIDTH($bits(neuron_ucode_rsp_t)))     ucode_rsp_if();
-    rv_if #(.WIDTH($bits(neuron_worker_result_t))) worker_result_if();
+    rv_if #(.WIDTH(NEURON_WORKER_START_W))  worker_start_if();
+    rv_if #(.WIDTH(NEURON_UCODE_REQ_W))     ucode_read_if();
+    rv_if #(.WIDTH(NEURON_UCODE_RSP_W))     ucode_rsp_if();
+    rv_if #(.WIDTH(NEURON_WORKER_RESULT_W)) worker_result_if();
 
     // ── Shared fanout staging bank (single FIFO, depth=4, all neurons) ────────
     // One tile_fanout_bank replaces the previous per-neuron array.  Depth=4
@@ -1379,7 +1382,7 @@ module tile_top #(
 
     // Ucode response: tile drives valid+payload; core drives ready internally
     assign ucode_rsp_if.valid      = worker_ucode_read_word_valid_c[0];
-    assign ucode_rsp_if.rv_payload = $bits(neuron_ucode_rsp_t)'(worker_ucode_read_word_c[0]);
+    assign ucode_rsp_if.rv_payload = NEURON_UCODE_RSP_W'(worker_ucode_read_word_c[0]);
 
     // Worker result: core drives valid+payload; tile drives ready
     assign worker_result_valid_c[0]      = worker_result_if.valid;

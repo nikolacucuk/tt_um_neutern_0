@@ -1,8 +1,11 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 
-module logical_neuron_state_bank_packed_bram #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module logical_neuron_state_bank_packed_bram
+  #(
     parameter int unsigned DATA_W = 8,
     parameter int unsigned DEPTH = 16,
     parameter int unsigned BYTE_LANES = (DATA_W + 7) / 8
@@ -58,7 +61,8 @@ module logical_neuron_state_bank_packed_bram #(
 endmodule
 
 (* keep_hierarchy = "no" *)
-module logical_neuron_state_bank #(
+module logical_neuron_state_bank
+  #(
     parameter int unsigned NEURONS_PER_TILE = 1,
     // Named constant for the default outbound-connections-per-neuron
     // multiplier so the magic 24 is documented and not scattered across

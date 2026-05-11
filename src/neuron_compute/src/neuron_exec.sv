@@ -1,8 +1,11 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 
-module neuron_exec (
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module neuron_exec
+  (
     input  wire execute_valid,
     input  wire [TAG_W-1:0]             exec_tag,
     input  wire [RF_FLAT_W-1:0]         rf_state_flat,

@@ -1,6 +1,5 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // logical_neuron_context_bank — direct FF register file for neuron context
@@ -26,7 +25,11 @@
 // mem_stall is always 0 — reads are combinatorial.
 // ─────────────────────────────────────────────────────────────────────────────
 (* keep_hierarchy = "no" *)
-module logical_neuron_context_bank #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module logical_neuron_context_bank
+  #(
     parameter int unsigned NEURONS_PER_TILE = 1,
     // Legacy parameters kept for API compatibility; all ignored in this impl.
     parameter int unsigned MEM_STYLE_HINT   = 3,

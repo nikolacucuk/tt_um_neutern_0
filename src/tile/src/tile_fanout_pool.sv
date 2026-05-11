@@ -1,6 +1,5 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 
 // -----------------------------------------------------------------------------
 // tile_fanout_pool - FF-backed per-synapse connection table
@@ -63,7 +62,11 @@
 //          1 cycle --> read_rsp_{valid,weight,dst_x,dst_y,core_id,meta_valid}
 // -----------------------------------------------------------------------------
 (* keep_hierarchy = "no" *)
-module tile_fanout_pool #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module tile_fanout_pool
+  #(
     parameter int unsigned FANOUT_POOL_DEPTH  = 256,
     parameter int unsigned MEM_STYLE_HINT     = 0,
     // Routing coordinate widths - set to actual mesh address widths to shrink

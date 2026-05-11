@@ -1,6 +1,5 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 
 // -----------------------------------------------------------------------------
 // tile_event_queue_bank - shared FF-backed FIFO for tile_queue_event_t spikes
@@ -46,7 +45,11 @@
 //              refills ----------------------------------------- dequeue_valid/data
 // -----------------------------------------------------------------------------
 (* keep_hierarchy = "no" *)
-module tile_event_queue_bank #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module tile_event_queue_bank
+  #(
     parameter int unsigned WORKER_CORES_PER_TILE   = 4,
     // Entries per worker logical FIFO. Must be a power of two.
     parameter int unsigned FIFO_DEPTH_PER_WORKER   = 64,

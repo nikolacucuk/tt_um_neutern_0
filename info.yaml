@@ -17,6 +17,7 @@ project:
   # Source files must be in ./src and you must list each source file separately, one per line.
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
+    - "project.v"
     - "tt_um_neutern_pkg.sv"
     - "common/packages/tile_pkg.sv"
     - "common/interfaces/rv_if.sv"
@@ -37,7 +38,6 @@ project:
     - "tile/src/tile_noc_egress.sv"
     - "tile/src/tile_top.sv"
     - "tile_top_tt.sv"
-    - "project.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).

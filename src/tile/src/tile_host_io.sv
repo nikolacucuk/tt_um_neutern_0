@@ -1,6 +1,5 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 // tile_host_io
 // ---------------------------------------------------------------------------
 // Host-side tile output path.  It arbitrates immediate ingress responses,
@@ -17,7 +16,11 @@
 //   * dump/read slots block new host read issues until their response returns
 //   * runtime emits are one-shot guarded against a stuck worker_commit_valid
 (* keep_hierarchy = "no" *)
-module tile_host_io #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module tile_host_io
+  #(
     parameter int unsigned LOCAL_Z = 0,
     parameter int unsigned NEURONS_PER_TILE = 2,
     parameter int unsigned WORKER_CORES_PER_TILE = 1,

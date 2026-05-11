@@ -1,5 +1,4 @@
 `default_nettype none
-`include "tile_flit_types.vh"
 
 // -----------------------------------------------------------------------------
 // logical_neuron_ucode_bank
@@ -19,7 +18,11 @@
 //  Stage 0 (addr latch) -> Stage 1 (array/bypass) -> Stage 2 (word out)
 // -----------------------------------------------------------------------------
 (* keep_hierarchy = "no" *)
-module logical_neuron_ucode_bank #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module logical_neuron_ucode_bank
+  #(
     parameter int unsigned NEURONS_PER_TILE      = 1,
     // Storage capacity in 16-bit words per neuron.  Runtime software uses
     // at most 16 words; increase here if future programs need more.

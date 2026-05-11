@@ -19,7 +19,7 @@ jobs:
       - name: Build Verilator 5.036
         if: steps.cache-verilator.outputs.cache-hit != 'true'
         run: |
-          sudo apt-get install -y git make autoconf g++ flex bison libfl2 libfl-dev
+          sudo apt-get install -y git make autoconf g++ flex bison libfl2 libfl-dev help2man
           git clone --depth 1 --branch v5.036 https://github.com/verilator/verilator /tmp/verilator_src
           cd /tmp/verilator_src && autoconf && ./configure --prefix=/opt/verilator
           make -j$(nproc) && sudo make install

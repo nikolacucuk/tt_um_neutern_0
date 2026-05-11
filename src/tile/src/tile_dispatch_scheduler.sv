@@ -1,6 +1,5 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 // tile_dispatch_scheduler
 // ---------------------------------------------------------------------------
 // Per-tile logical-spike ready-FIFO scheduler.  Replaces the original
@@ -31,7 +30,11 @@
 // consumer in the tile (~2.9k LUTs x 4 tiles for N=128).  An explicit
 // FIFO + 128-wide priority encoder is O(log N) depth and ~10x smaller.
 (* keep_hierarchy = "no" *)
-module tile_dispatch_scheduler #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module tile_dispatch_scheduler
+  #(
     parameter int unsigned NEURONS_PER_TILE = 2,
     parameter int unsigned WORKER_CORES_PER_TILE = 1,
     parameter int unsigned FANOUT_POOL_DEPTH = 256,

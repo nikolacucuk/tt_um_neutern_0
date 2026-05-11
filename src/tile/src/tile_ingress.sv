@@ -1,6 +1,5 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 
 // tile_ingress
 // ---------------------------------------------------------------------------
@@ -20,7 +19,11 @@
 //   payload_is_spike = 1: spike event, decoded into local neuron index and
 //                         enqueued only after a header has been accepted
 (* keep_hierarchy = "no" *)
-module tile_ingress #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module tile_ingress
+  #(
     parameter int unsigned LOCAL_Z = 0,
     parameter int unsigned NEURONS_PER_TILE = 2,
     parameter int unsigned FANOUT_POOL_DEPTH = 256,

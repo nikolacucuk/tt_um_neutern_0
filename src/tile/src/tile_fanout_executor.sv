@@ -1,6 +1,5 @@
 `default_nettype none
 
-`include "tile_flit_types.vh"
 // tile_fanout_executor
 // ---------------------------------------------------------------------------
 // Fanout walker for emitted spikes.  A worker commit that produced a spike is
@@ -24,7 +23,11 @@
 //   than an N-bit destination mask, avoiding a 1024-bit pending register and
 //   N-wide accept/conflict gates.
 (* keep_hierarchy = "no" *)
-module tile_fanout_executor #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module tile_fanout_executor
+  #(
     parameter int unsigned LOCAL_Z = 0,
     parameter int unsigned NEURONS_PER_TILE = 2,
     parameter int unsigned WORKER_CORES_PER_TILE = 1,

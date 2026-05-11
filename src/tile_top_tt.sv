@@ -47,9 +47,12 @@
 
 `default_nettype none
 
-`include "tile_flit_types.vh"
 
-module tile_top_tt #(
+`ifndef YOSYS
+import tile_pkg::*;
+`endif
+module tile_top_tt
+  #(
     parameter int unsigned TILE_COORD_X          = 0,
     parameter int unsigned TILE_COORD_Y          = 0,
     parameter int unsigned LOCAL_Z               = 0,
