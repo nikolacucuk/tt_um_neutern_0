@@ -41,7 +41,7 @@ header-based weight write/readback, ISA-header programming ack,
 back-pressure, burst streaming, enable gating, reset-during-transfer,
 and `uo_out` format verification.
 
-### tile_top-level tests (`src/tile/test/test_tile_top.py`) — 14/40 pass
+### tile_top-level tests (`src/tile/test/test_tile_top.py`) — 40/40 pass ✅
 
 Exercises `tile_top` internals directly (host I/O, CSR, ucode, fanout weight):
 
@@ -49,10 +49,9 @@ Exercises `tile_top` internals directly (host I/O, CSR, ucode, fanout weight):
 cd src/tile/test && make SIM=verilator
 ```
 
-14 configuration and host-protocol tests pass. Compute-core tests are blocked
-by a Verilator convergence limitation in `tile_top`'s spike-ingress combinational
-path (see `src/tile/test/README.md`). The same paths are covered by the
-29 TT-boundary tests above.
+All 40 tile-level tests now pass, including host I/O, CSR, ucode, fanout weight,
+spike ingress, compute-core dispatch/drain, back-pressure, burst streaming,
+and sweep scenarios.
 
 ## Project structure
 
@@ -64,7 +63,7 @@ src/
   neuron_compute/       — Compute worker (neuron_exec + core)
   common/               — Shared packages, interfaces, memory primitives
 test/
-  test.py               — 29-test TT-boundary cocotb suite (primary)
+  test.py               — 31-test TT-boundary cocotb suite (primary)
   Makefile              — Verilator-based build for TT tests
 src/tile/test/
   test_tile_top.py      — 40-test tile_top cocotb suite (supplemental)
