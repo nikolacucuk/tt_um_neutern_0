@@ -17,8 +17,14 @@ WAVES  ?= 0
 FST    ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 
-# Verilator root — required by cocotb's Makefile.verilator for version checks
-export VERILATOR_ROOT ?= /foss/tools/verilator/share/verilator
+# Verilator root — only set when running inside iic-osic-tools where verilator
+# lives under /foss; on stock CI runners the system verilator manages its own
+# VERILATOR_ROOT and setting it here causes a "inconsistent path" error.
+ifeq ($(VERILATOR_ROOT),)
+ifneq ($(wildcard /foss/tools/verilator/share/verilator),)
+export VERILATOR_ROOT := /foss/tools/verilator/share/verilator
+endif
+endif
 
 # Write results.xml at the repo-level path expected by test-summary/action
 export COCOTB_RESULTS_FILE ?= $(CURDIR)/results.xml
