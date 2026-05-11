@@ -1,10 +1,11 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.183.0/containers/ubuntu
 {
-  "name": "Tiny Tapeout Dev Container",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
+  "name": "Tiny Tapeout Dev Container (hpretl/iic-osic-tools:2026.04)",
+  "image": "hpretl/iic-osic-tools:2026.04",
+  "containerEnv": {
+    "PDK_ROOT": "/foss/pdks",
+    "PDK": "sky130A"
   },
   "runArgs": [
     "--memory=10GB"
@@ -25,6 +26,6 @@
       "dockerDashComposeVersion": "none"
     }
   },
-  "postCreateCommand": "echo 'source /ttsetup/venv/bin/activate' >> ~/.bashrc",
-  "postStartCommand": "/ttsetup/copy_tt_support_tools.sh"
+  "postCreateCommand": "bash -lc 'if [ -f /ttsetup/venv/bin/activate ]; then echo \"source /ttsetup/venv/bin/activate\" >> ~/.bashrc; fi'",
+  "postStartCommand": "bash -lc 'if [ -x /ttsetup/copy_tt_support_tools.sh ]; then /ttsetup/copy_tt_support_tools.sh; fi'"
 }

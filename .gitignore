@@ -67,3 +67,5 @@ src/fusesoc.conf
 .devcontainer/devcontainer.json
 /.devcontainer
 src/tile/docs/tile_top_architecture.md
+.devcontainer/devcontainer.json
+/.devcontainer
