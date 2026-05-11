@@ -6,16 +6,19 @@ SIM    ?= verilator
 WAVES  ?= 0
 FST    ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
+
+# Verilator root — required by cocotb's Makefile.verilator for version checks
+export VERILATOR_ROOT ?= /foss/tools/verilator/share/verilator
+
+# Write results.xml at the repo-level path expected by test-summary/action
+export COCOTB_RESULTS_FILE ?= $(CURDIR)/results.xml
+
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = \
   tt_um_neutern_pkg.sv \
   common/packages/tile_pkg.sv \
   common/interfaces/rv_if.sv \
-  common/interfaces/rv_flit_if.sv \
-  common/arb/coldfoot_rr_arbiter.sv \
-  common/mem/tile_mem_1r1w_sync.sv \
   common/mem/coldfoot_mem_bytelane_sync.sv \
-  common/mem/gf180mcu_ocd_sram_lint_stubs.v \
   logical_neuron/src/logical_neuron_pkg.sv \
   logical_neuron/src/logical_neuron_context_bank.sv \
   logical_neuron/src/logical_neuron_state_bank.sv \
