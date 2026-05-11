@@ -1,5 +1,10 @@
 `default_nettype none
 
+`ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
+import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
+`endif
 
 // -----------------------------------------------------------------------------
 // tile_event_queue_bank - shared FF-backed FIFO for tile_queue_event_t spikes
@@ -45,11 +50,7 @@
 //              refills ----------------------------------------- dequeue_valid/data
 // -----------------------------------------------------------------------------
 (* keep_hierarchy = "no" *)
-`ifndef YOSYS
-import tile_pkg::*;
-`endif
-module tile_event_queue_bank
-  #(
+module tile_event_queue_bank #(
     parameter int unsigned WORKER_CORES_PER_TILE   = 4,
     // Entries per worker logical FIFO. Must be a power of two.
     parameter int unsigned FIFO_DEPTH_PER_WORKER   = 64,
@@ -161,9 +162,8 @@ module tile_event_queue_bank
     logic               mem_push_fire_c;
 
     // ── Build per-worker metadata ─────────────────────────────────────────────
-    integer i;
     always_comb begin
-        for (i = 0; i < W; i++) begin
+        for (int i = 0; i < W; i++) begin
             enq_c[i]   = tile_queue_event_t'(enqueue_data[i*ELEM_W +: ELEM_W]);
             full_c[i]  = (count_r[i] == CNT_W'(FIFO_DEPTH_PER_WORKER));
             empty_c[i] = (count_r[i] == '0);
@@ -187,12 +187,11 @@ module tile_event_queue_bank
     end
 
     // ── Arbitration: find push winner (round-robin starting at rr_grant_r) ───
-    integer arb_k;
-    integer arb_idx;
     always_comb begin
+        int arb_idx;
         arb_push_valid_c  = 1'b0;
         arb_push_winner_c = '0;
-        for (arb_k = 0; arb_k < W; arb_k = arb_k + 1) begin
+        for (int arb_k = 0; arb_k < W; arb_k = arb_k + 1) begin
             arb_idx = int'(rr_grant_r) + arb_k;
             if (arb_idx >= W)
                 arb_idx = arb_idx - W;
@@ -206,7 +205,7 @@ module tile_event_queue_bank
         // Refill winner: any worker in state addr_issued (waiting on mem data).
         arb_refill_valid_c  = 1'b0;
         arb_refill_winner_c = refill_owner_r;
-        for (arb_k = 0; arb_k < W; arb_k = arb_k + 1) begin
+        for (int arb_k = 0; arb_k < W; arb_k = arb_k + 1) begin
             if (!arb_refill_valid_c && (refill_st_r[arb_k] == 2'd1)) begin
                 arb_refill_valid_c  = 1'b1;
                 arb_refill_winner_c = WIDX_W'(arb_k);
@@ -231,7 +230,7 @@ module tile_event_queue_bank
     // mem_stall: any worker has a pending refill not yet committed to cache.
     always_comb begin
         mem_stall = mem_wait;
-        for (i = 0; i < W; i++) mem_stall |= (refill_st_r[i] != 2'd0);
+        for (int i = 0; i < W; i++) mem_stall |= (refill_st_r[i] != 2'd0);
     end
 
     // ── Sequential: per-worker FIFO control + refill pipeline ────────────────
@@ -239,7 +238,7 @@ module tile_event_queue_bank
         if (!rst_n) begin
             rr_grant_r    <= '0;
             refill_owner_r <= '0;
-            for (i = 0; i < W; i++) begin
+            for (int i = 0; i < W; i++) begin
                 head_r[i]        <= '0;
                 tail_r[i]        <= '0;
                 count_r[i]       <= '0;
@@ -249,7 +248,7 @@ module tile_event_queue_bank
             end
         end else begin
             if (soft_reset_valid) begin
-                for (i = 0; i < W; i++) begin
+                for (int i = 0; i < W; i++) begin
                     head_r[i]        <= '0;
                     tail_r[i]        <= '0;
                     count_r[i]       <= '0;
@@ -266,7 +265,7 @@ module tile_event_queue_bank
                 // ── Refill pipeline ───────────────────────────────────────────
                 // State 1 (addr_issued): mem will produce data next cycle.
                 // State 2 (data_ready): latch mem_rd_data into cache.
-                for (i = 0; i < W; i++) begin
+                for (int i = 0; i < W; i++) begin
                     case (refill_st_r[i])
                         2'd1: begin
                             if (mem_read_fire_c && (int'(arb_refill_winner_c) == i)) begin
@@ -284,7 +283,7 @@ module tile_event_queue_bank
                 end
 
                 // ── Per-worker pop / push ─────────────────────────────────────
-                for (i = 0; i < W; i++) begin
+                for (int i = 0; i < W; i++) begin
                     if (pop_c[i]) begin
                         cache_valid_r[i] <= 1'b0;
                         head_r[i]        <= head_r[i] + PTR_W'(1);

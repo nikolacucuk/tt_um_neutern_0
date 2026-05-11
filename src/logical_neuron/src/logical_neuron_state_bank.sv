@@ -2,7 +2,9 @@
 
 
 `ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
 import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
 `endif
 module logical_neuron_state_bank_packed_bram
   #(
@@ -22,15 +24,13 @@ module logical_neuron_state_bank_packed_bram
 );
     logic [DATA_W-1:0] rd_data_raw;
     logic [DATA_W-1:0] rd_data_bypass_c;
-    integer byte_idx;
-    integer init_idx;
 
     (* ram_style = "block" *) logic [DATA_W-1:0] mem [0:DEPTH-1];
     logic [DATA_W-1:0] merged_wr_data_c;
 
     always_comb begin
         merged_wr_data_c = mem[wr_addr];
-        for (byte_idx = 0; byte_idx < BYTE_LANES; byte_idx = byte_idx + 1) begin
+        for (int byte_idx = 0; byte_idx < BYTE_LANES; byte_idx = byte_idx + 1) begin
             if (wr_byte_en[byte_idx]) begin
                 merged_wr_data_c[byte_idx*8 +: 8] = wr_data[byte_idx*8 +: 8];
             end
@@ -38,7 +38,7 @@ module logical_neuron_state_bank_packed_bram
     end
 
     initial begin
-        for (init_idx = 0; init_idx < DEPTH; init_idx++) begin
+        for (int init_idx = 0; init_idx < DEPTH; init_idx++) begin
             mem[init_idx] = '0;
         end
         rd_data = '0;
@@ -267,10 +267,6 @@ module logical_neuron_state_bank
     logic fanout_len_wr_en_c;
     logic [NEURON_IDX_W-1:0] fanout_len_wr_idx_c;
     logic [FANOUT_PTR_W-1:0] fanout_len_wr_data_c;
-    integer idx;
-    integer d;
-    integer b;
-    integer byte_idx;
 
     logic dispatch_bram_wr_en_c;
     logic [NEURON_IDX_W-1:0] dispatch_bram_wr_addr_c;
@@ -995,12 +991,12 @@ module logical_neuron_state_bank
                     // gating the reset lets synthesis eliminate the flip-flops.
                     if (UCODE_SHARED_BANK == 0)
                         ucode_ptr_mem_r[ucode_reset_idx]   <= 5'd0;
-                        ucode_len_mem_r[ucode_reset_idx]   <= 5'd0;
-                        init_v_mem_r[ucode_reset_idx]      <= 8'd0;
-                        init_syn_r[ucode_reset_idx]        <= 8'd0;
+                    ucode_len_mem_r[ucode_reset_idx]   <= 5'd0;
+                    init_v_mem_r[ucode_reset_idx]      <= 8'd0;
+                    init_syn_r[ucode_reset_idx]        <= 8'd0;
                         // init_refr removed
-                        init_aux_r[ucode_reset_idx]        <= 8'd0;
-                        neuron_flags_r[ucode_reset_idx]    <= 8'd0;
+                    init_aux_r[ucode_reset_idx]        <= 8'd0;
+                    neuron_flags_r[ucode_reset_idx]    <= 8'd0;
                         // last_event_time removed
                 end
             end else if (ena) begin

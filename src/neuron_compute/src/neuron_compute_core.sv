@@ -2,7 +2,9 @@
 
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
 import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
 `endif
 module neuron_compute_core
   #(

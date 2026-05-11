@@ -1,11 +1,12 @@
 `default_nettype none
 
-
 `ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
 import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
 `endif
-module neuron_exec
-  (
+
+module neuron_exec (
     input  wire execute_valid,
     input  wire [TAG_W-1:0]             exec_tag,
     input  wire [RF_FLAT_W-1:0]         rf_state_flat,
@@ -30,7 +31,7 @@ module neuron_exec
     integer rf_idx;
 
     logic signed [7:0] tmp_rf [0:RF_COUNT-1];
-    logic [4:0] instr_op;
+    logic [NEURON_OP_W-1:0] instr_op;  // width matches opcode definitions in tile_pkg
     logic [2:0] instr_rd;
     logic [2:0] instr_k;
     logic signed [7:0] instr_imm4;
@@ -108,14 +109,14 @@ module neuron_exec
         emit_data_next = emit_data_in;
         if (execute_valid && !tag_gate_skip_c) begin
             // Compact 12-bit instruction format: [11:7]=op, [6:4]=rd, [3]=sign, [2:0]=k
-            instr_op = instr_word[11:7];
+            instr_op = {1'b0, instr_word[11:7]};  // zero-extend 5-bit field to NEURON_OP_W=6
             instr_rd = instr_word[6:4];
             instr_k = instr_word[2:0];
             instr_imm4 = imm4_from_fields(instr_word[3], instr_k);
 
             case (instr_op)
                 OP_LDI: begin
-                    if (instr_rd < 3'(RF_COUNT)) tmp_rf[instr_rd] = instr_imm4;
+                    if (instr_rd < 3'(RF_COUNT)) tmp_rf[2'(instr_rd)] = instr_imm4;  // cast: array[0:2] needs 2-bit index
                 end
                 OP_RECV: begin
                     last_tag_next = exec_tag;

@@ -31,7 +31,9 @@
 // FIFO + 128-wide priority encoder is O(log N) depth and ~10x smaller.
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
 import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
 `endif
 module tile_dispatch_scheduler
   #(
@@ -204,8 +206,9 @@ module tile_dispatch_scheduler
 `endif
 );
 
+    /* verilator lint_off VARHIDDEN */
     localparam int unsigned NEURON_IDX_W =
-        (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE);
+        (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE); /* verilator lint_on VARHIDDEN */
     localparam int unsigned WORKER_IDX_W =
         (WORKER_CORES_PER_TILE <= 1) ? 1 : $clog2(WORKER_CORES_PER_TILE);
     localparam int unsigned FANOUT_ADDR_W =

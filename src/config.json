@@ -8,7 +8,7 @@
   "GRT_ANTENNA_REPAIR_MARGIN": 50,
   "DRT_ANTENNA_REPAIR_ITERS": 5,
   "CTS_SINK_CLUSTERING_MAX_DIAMETER": 15,
-  "ERROR_ON_SYNTH_CHECKS": false,
+  "ERROR_ON_SYNTH_CHECKS": true,
   "VERILOG_FILES": [
     "dir::tt_um_neutern_pkg.sv",
     "dir::common/packages/tile_pkg.sv",

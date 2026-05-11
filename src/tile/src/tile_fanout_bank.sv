@@ -1,5 +1,10 @@
 `default_nettype none
 
+`ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
+import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
+`endif
 
 // -----------------------------------------------------------------------------
 // tile_fanout_bank - shared FF-backed FIFO for compact tile_fanout_spike_t output spikes
@@ -37,11 +42,7 @@
 //   per-worker head_cache --> dequeue_valid[w]/data[w]
 // -----------------------------------------------------------------------------
 (* keep_hierarchy = "no" *)
-`ifndef YOSYS
-import tile_pkg::*;
-`endif
-module tile_fanout_bank
-  #(
+module tile_fanout_bank #(
     parameter int unsigned WORKER_CORES_PER_TILE  = 4,
     // Entries per worker logical FIFO. Must be a power of two.
     parameter int unsigned FIFO_DEPTH_PER_WORKER  = 64,
@@ -138,10 +139,8 @@ module tile_fanout_bank
     logic              rd_grant_valid_c;
 
     // ── Combinational: per-worker wants ──────────────────────────────────────
-    integer i;
-    integer w;
     always_comb begin
-        for (w = 0; w < W; w++) begin
+        for (int w = 0; w < W; w++) begin
             enq_c[w]         = tile_fanout_spike_t'(enqueue_data[w*ELEM_W +: ELEM_W]);
             full_c[w]        = (count_r[w] == CNT_W'(FIFO_DEPTH_PER_WORKER));
             empty_c[w]       = (count_r[w] == '0);
@@ -163,9 +162,10 @@ module tile_fanout_bank
 
     // ── Write arbitration: round-robin among workers wanting to push ──────────
     always_comb begin : wr_arb
+        int w;
         wr_grant_c       = '0;
         wr_grant_valid_c = 1'b0;
-        for (i = 0; i < W; i++) begin
+        for (int i = 0; i < W; i++) begin
             w = (int'(rr_wr_r) + i) % W;
             if (push_want_c[w] && !wr_grant_valid_c) begin
                 wr_grant_c       = WIDX_W'(w);
@@ -182,10 +182,11 @@ module tile_fanout_bank
     // Refill reads take priority; only issue a new read when the pipeline
     // is not already occupied (rd_inflight_valid_r == 0).
     always_comb begin : rd_arb
+        int w;
         rd_grant_c       = '0;
         rd_grant_valid_c = 1'b0;
         if (!rd_inflight_valid_r) begin
-            for (i = 0; i < W; i++) begin
+            for (int i = 0; i < W; i++) begin
                 w = (int'(rr_rd_r) + i) % W;
                 if (refill_want_c[w] && !rd_grant_valid_c) begin
                     rd_grant_c       = WIDX_W'(w);
@@ -203,7 +204,7 @@ module tile_fanout_bank
             rr_rd_r             <= '0;
             rd_inflight_r       <= '0;
             rd_inflight_valid_r <= 1'b0;
-            for (w = 0; w < W; w++) begin
+            for (int w = 0; w < W; w++) begin
                 head_r[w]        <= '0;
                 tail_r[w]        <= '0;
                 count_r[w]       <= '0;
@@ -227,7 +228,7 @@ module tile_fanout_bank
             end
 
             // ── Per-worker: graph_state_clear reset ──────────────────────────
-            for (w = 0; w < W; w++) begin
+            for (int w = 0; w < W; w++) begin
                 if (graph_state_clear) begin
                     head_r[w]        <= '0;
                     tail_r[w]        <= '0;

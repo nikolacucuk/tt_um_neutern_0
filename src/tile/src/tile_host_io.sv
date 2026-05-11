@@ -17,7 +17,9 @@
 //   * runtime emits are one-shot guarded against a stuck worker_commit_valid
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
 import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
 `endif
 module tile_host_io
   #(
@@ -129,8 +131,9 @@ module tile_host_io
     input  neuron_emit_t              worker_result_emit
 );
 
+    /* verilator lint_off VARHIDDEN */
     localparam int unsigned NEURON_IDX_W =
-        (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE);
+        (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE); /* verilator lint_on VARHIDDEN */
     localparam int unsigned FANOUT_ADDR_W =
         (FANOUT_POOL_DEPTH <= 1) ? 1 : $clog2(FANOUT_POOL_DEPTH);
     localparam int unsigned HOST_OUTPUT_FIFO_PTR_W =

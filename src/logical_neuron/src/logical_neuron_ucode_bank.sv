@@ -1,5 +1,10 @@
 `default_nettype none
 
+`ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
+import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
+`endif
 // -----------------------------------------------------------------------------
 // logical_neuron_ucode_bank
 //
@@ -18,11 +23,7 @@
 //  Stage 0 (addr latch) -> Stage 1 (array/bypass) -> Stage 2 (word out)
 // -----------------------------------------------------------------------------
 (* keep_hierarchy = "no" *)
-`ifndef YOSYS
-import tile_pkg::*;
-`endif
-module logical_neuron_ucode_bank
-  #(
+module logical_neuron_ucode_bank #(
     parameter int unsigned NEURONS_PER_TILE      = 1,
     // Storage capacity in 16-bit words per neuron.  Runtime software uses
     // at most 16 words; increase here if future programs need more.
@@ -48,8 +49,9 @@ module logical_neuron_ucode_bank
     rv_if.tx  read_rsp_port
 );
     // ---- Local parameters -------------------------------------------------
+    /* verilator lint_off VARHIDDEN */
     localparam int unsigned NEURON_IDX_W =
-        (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE);
+        (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE); /* verilator lint_on VARHIDDEN */
     localparam int unsigned UCODE_NEURON_BANKS =
         (UCODE_SHARED_BANK != 0) ? 1 : NEURONS_PER_TILE;
     localparam int unsigned UCODE_BANK_IDX_W =

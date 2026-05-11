@@ -18,7 +18,8 @@
 //   * waitrequest is always 0.
 
 module coldfoot_mem_bytelane_sync #(
-    parameter int unsigned DATA_W     = 8,
+    /* verilator lint_off VARHIDDEN */
+    parameter int unsigned DATA_W     = 8, /* verilator lint_on VARHIDDEN */
     parameter int unsigned DEPTH      = 16,
     parameter int unsigned BYTE_LANES = (DATA_W + 7) / 8,
     parameter int unsigned ADDR_W     = (DEPTH <= 1) ? 1 : $clog2(DEPTH),

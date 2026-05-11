@@ -20,7 +20,9 @@
 //                         enqueued only after a header has been accepted
 (* keep_hierarchy = "no" *)
 `ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
 import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
 `endif
 module tile_ingress
   #(
@@ -143,8 +145,9 @@ module tile_ingress
                                        state_target_fanout_ptr
 );
 
+    /* verilator lint_off VARHIDDEN */
     localparam int unsigned NEURON_IDX_W =
-        (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE);
+        (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE); /* verilator lint_on VARHIDDEN */
     localparam int unsigned SPIKE_COORD_IDX_W = 2 * NEURON_LOCAL_W;
     localparam int unsigned SPIKE_IDX_CMP_W = SPIKE_COORD_IDX_W + 1;
     localparam int unsigned FANOUT_ADDR_W =

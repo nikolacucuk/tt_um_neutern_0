@@ -1,5 +1,10 @@
 `default_nettype none
 
+`ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
+import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
+`endif
 
 // -----------------------------------------------------------------------------
 // tile_fanout_pool - FF-backed per-synapse connection table
@@ -62,11 +67,7 @@
 //          1 cycle --> read_rsp_{valid,weight,dst_x,dst_y,core_id,meta_valid}
 // -----------------------------------------------------------------------------
 (* keep_hierarchy = "no" *)
-`ifndef YOSYS
-import tile_pkg::*;
-`endif
-module tile_fanout_pool
-  #(
+module tile_fanout_pool #(
     parameter int unsigned FANOUT_POOL_DEPTH  = 256,
     parameter int unsigned MEM_STYLE_HINT     = 0,
     // Routing coordinate widths - set to actual mesh address widths to shrink
@@ -174,7 +175,6 @@ module tile_fanout_pool
     // Flips on every graph_state_clear; used to invalidate all prior entries
     // without re-writing all rows.
     logic graph_epoch_r;
-    integer rb;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) graph_epoch_r <= 1'b0;
         else if (ena && graph_state_clear) graph_epoch_r <= ~graph_epoch_r;
@@ -188,7 +188,9 @@ module tile_fanout_pool
     logic [FANOUT_ADDR_W-1:0] mem_rd_addr_c;
     logic [ENTRY_W-1:0]     mem_rd_data;
     logic                   mem_waitreq;
-    logic [ROUTE_BYTES*8-1:0] route_pack_c;  // hoisted to avoid Verilator LATCH FP
+    // route_pack_c removed from always_comb (read-back within always_comb creates
+    // false combinational loops in Yosys).  Fields are now written directly into
+    // mem_wr_data_c at their absolute byte-lane bit offsets.
 
     // Write logic
     //
@@ -204,7 +206,6 @@ module tile_fanout_pool
         mem_wr_addr_c = write_index;
         mem_wr_data_c = '0;
         mem_wr_mask_c = '0;
-        route_pack_c   = '0;
 
         if (write_en && write_mask_valid) begin
             mem_wr_en_c = 1'b1;
@@ -216,24 +217,25 @@ module tile_fanout_pool
             end
 
             if (!write_weight_only) begin
-                // Route byte(s): pack dst_x || dst_y || core_id LSB-first
-                // into ROUTE_BYTES bytes.  Upper padding bits stay 0.
+                // Route byte(s): write dst_x || dst_y || core_id directly into
+                // mem_wr_data_c at absolute bit offsets (ROW_OFF_ROUTE*8 + field_offset).
+                // Avoids the intermediate route_pack_c read-back that Yosys interpreted
+                // as a combinational loop.
                 if (FANOUT_DST_X_W > 0)
-                    route_pack_c[ROFF_DST_X +: FANOUT_DST_X_W] =
+                    mem_wr_data_c[ROW_OFF_ROUTE*8 + ROFF_DST_X +: FANOUT_DST_X_W] =
                         FANOUT_DST_X_W'(write_dst_x);
                 if (FANOUT_DST_Y_W > 0)
-                    route_pack_c[ROFF_DST_Y +: FANOUT_DST_Y_W] =
+                    mem_wr_data_c[ROW_OFF_ROUTE*8 + ROFF_DST_Y +: FANOUT_DST_Y_W] =
                         FANOUT_DST_Y_W'(write_dst_y);
                 if (FANOUT_CORE_ID_W > 0)
-                    route_pack_c[ROFF_CORE_ID +: FANOUT_CORE_ID_W] =
+                    mem_wr_data_c[ROW_OFF_ROUTE*8 + ROFF_CORE_ID +: FANOUT_CORE_ID_W] =
                         FANOUT_CORE_ID_W'(write_core_id);
                 if (PACK_META_IN_ROUTE) begin
-                    route_pack_c[ROUTE_META_VALID_BIT] = write_entry_valid_c;
-                    route_pack_c[ROUTE_META_EPOCH_BIT] = graph_epoch_r;
+                    mem_wr_data_c[ROW_OFF_ROUTE*8 + ROUTE_META_VALID_BIT] = write_entry_valid_c;
+                    mem_wr_data_c[ROW_OFF_ROUTE*8 + ROUTE_META_EPOCH_BIT] = graph_epoch_r;
                 end
-                for (rb = 0; rb < ROUTE_BYTES; rb = rb + 1) begin
-                    mem_wr_mask_c[ROW_OFF_ROUTE + rb]           = 1'b1;
-                    mem_wr_data_c[(ROW_OFF_ROUTE + rb)*8 +: 8]  = route_pack_c[rb*8 +: 8];
+                for (int rb = 0; rb < ROUTE_BYTES; rb = rb + 1) begin
+                    mem_wr_mask_c[ROW_OFF_ROUTE + rb] = 1'b1;
                 end
             end
 

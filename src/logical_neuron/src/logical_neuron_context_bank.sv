@@ -1,5 +1,10 @@
 `default_nettype none
 
+`ifndef YOSYS
+/* verilator lint_off IMPORTSTAR */
+import tile_pkg::*;
+/* verilator lint_on IMPORTSTAR */
+`endif
 
 // ─────────────────────────────────────────────────────────────────────────────
 // logical_neuron_context_bank — direct FF register file for neuron context
@@ -25,11 +30,7 @@
 // mem_stall is always 0 — reads are combinatorial.
 // ─────────────────────────────────────────────────────────────────────────────
 (* keep_hierarchy = "no" *)
-`ifndef YOSYS
-import tile_pkg::*;
-`endif
-module logical_neuron_context_bank
-  #(
+module logical_neuron_context_bank #(
     parameter int unsigned NEURONS_PER_TILE = 1,
     // Legacy parameters kept for API compatibility; all ignored in this impl.
     parameter int unsigned MEM_STYLE_HINT   = 3,
@@ -69,7 +70,8 @@ module logical_neuron_context_bank
     output logic mem_stall
 );
     // ── Constants ─────────────────────────────────────────────────────────────
-    localparam int unsigned NEURON_IDX_W = (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE);
+    /* verilator lint_off VARHIDDEN */
+    localparam int unsigned NEURON_IDX_W = (NEURONS_PER_TILE <= 1) ? 1 : $clog2(NEURONS_PER_TILE); /* verilator lint_on VARHIDDEN */
     localparam logic [RF_FLAT_W-1:0] DEFAULT_RF = {4'h7, 4'h0, 4'h0};  // rf[2]=threshold=7, rf[1]=accum=0, rf[0]=vm=0
     localparam int unsigned RF_W         = RF_FLAT_W;  // = 12 (3 x 4-bit regs)
     // CTX layout: [RF_FLAT_W-1:0]=rf_state_flat, [RF_FLAT_W]=last_tag, [RF_FLAT_W+1]=cmp_ge,
