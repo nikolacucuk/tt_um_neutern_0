@@ -14,6 +14,10 @@ module tt_um_neutern_0 (
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
+`ifdef USE_POWER_PINS
+    ,inout wire       VPWR,
+    inout wire        VGND
+`endif
 );
 
   // ---------------------------------------------------------------------------
