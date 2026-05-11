@@ -1,0 +1,40 @@
+[tasks]
+ingress_no_drop
+ingress_onehot_or_broadcast   INGRESS_ONEHOT_OR_BROADCAST
+core_id_matches_target        CORE_ID_MATCHES_TARGET
+enqueue_fire_requires_match   ENQUEUE_FIRE_REQUIRES_MATCH
+
+[options]
+ingress_no_drop:              mode bmc
+ingress_no_drop:              depth 8
+ingress_onehot_or_broadcast:  mode bmc
+ingress_onehot_or_broadcast:  depth 12
+core_id_matches_target:       mode bmc
+core_id_matches_target:       depth 12
+enqueue_fire_requires_match:  mode bmc
+enqueue_fire_requires_match:  depth 12
+
+[engines]
+smtbmc yices
+
+[script]
+ingress_no_drop:              plugin -i slang
+ingress_no_drop:              read_slang --top tile_ingress_formal --compat-mode -DSYNTHESIS -DFORMAL -DINGRESS_NO_DROP             tile_pkg.sv rv_if.sv tile_ingress.sv tile_ingress_formal.sv
+ingress_no_drop:              prep -top tile_ingress_formal
+ingress_onehot_or_broadcast:  plugin -i slang
+ingress_onehot_or_broadcast:  read_slang --top tile_ingress_formal --compat-mode -DSYNTHESIS -DFORMAL -DINGRESS_ONEHOT_OR_BROADCAST tile_pkg.sv rv_if.sv tile_ingress.sv tile_ingress_formal.sv
+ingress_onehot_or_broadcast:  prep -top tile_ingress_formal
+core_id_matches_target:       plugin -i slang
+core_id_matches_target:       read_slang --top tile_ingress_formal --compat-mode -DSYNTHESIS -DFORMAL -DCORE_ID_MATCHES_TARGET      tile_pkg.sv rv_if.sv tile_ingress.sv tile_ingress_formal.sv
+core_id_matches_target:       prep -top tile_ingress_formal
+enqueue_fire_requires_match:  plugin -i slang
+enqueue_fire_requires_match:  read_slang --top tile_ingress_formal --compat-mode -DSYNTHESIS -DFORMAL -DENQUEUE_FIRE_REQUIRES_MATCH tile_pkg.sv rv_if.sv tile_ingress.sv tile_ingress_formal.sv
+enqueue_fire_requires_match:  prep -top tile_ingress_formal
+
+[files]
+../../../common/packages/tile_pkg.sv
+../../../common/packages/tile_flit_types.vh
+../../../common/interfaces/rv_if.sv
+../src/tile_pkg.svh
+../src/tile_ingress.sv
+tile_ingress_formal.sv

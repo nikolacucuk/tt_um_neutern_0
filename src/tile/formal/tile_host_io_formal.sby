@@ -1,0 +1,28 @@
+[tasks]
+fifo_count_bound
+emit_one_shot
+
+[options]
+fifo_count_bound: mode bmc
+fifo_count_bound: depth 8
+emit_one_shot:    mode bmc
+emit_one_shot:    depth 6
+
+[engines]
+smtbmc yices
+
+[script]
+fifo_count_bound: plugin -i slang
+fifo_count_bound: read_slang --top tile_host_io_formal --compat-mode -DSYNTHESIS -DFORMAL -DFIFO_COUNT_BOUND tile_pkg.sv rv_if.sv tile_host_io.sv tile_host_io_formal.sv
+fifo_count_bound: prep -top tile_host_io_formal
+emit_one_shot:    plugin -i slang
+emit_one_shot:    read_slang --top tile_host_io_formal --compat-mode -DSYNTHESIS -DFORMAL -DEMIT_ONE_SHOT    tile_pkg.sv rv_if.sv tile_host_io.sv tile_host_io_formal.sv
+emit_one_shot:    prep -top tile_host_io_formal
+
+[files]
+../../../common/packages/tile_pkg.sv
+../../../common/packages/tile_flit_types.vh
+../../../common/interfaces/rv_if.sv
+../src/tile_pkg.svh
+../src/tile_host_io.sv
+tile_host_io_formal.sv

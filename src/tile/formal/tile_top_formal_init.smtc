@@ -1,0 +1,4 @@
+# Initial-state constraint: force rst_n=0 at the first model state.
+# This works in concert with the f_first_cycle FF in the harness.
+initial
+assume (= [rst_n] false)

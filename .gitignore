@@ -3,6 +3,9 @@
 *.vcd
 *.fst
 *.fst.hier
+.github/agents/*
+.github/instructions/*
+.github/copilot-instructions.md
 runs
 tt_submission
 src/user_config.json
@@ -11,3 +14,56 @@ test/sim_build
 test/__pycache__/
 test/results.xml
 test/gate_level_netlist.v
+.devcontainer/devcontainer-lock.json
+docs/logical_neuron_context_bank_architecture.md
+docs/neuron_compute_core_architecture.md
+docs/neuron_exec_architecture.md
+docs/tile_top_architecture.md
+docs/tt_um_neutern_0_architecture.md
+docs/tile_top_sim_failure_analysis.md
+docs/tt_um_neutern_0_optimization.md
+src/logical_neuron/docs/logical_neuron_context_bank_architecture.md
+src/neuron_compute/docs/neuron_compute_core_architecture.md
+src/neuron_compute/docs/neuron_exec_architecture.md
+
+# ── FuseSoC / Verilator build outputs ────────────────────────────────────────
+build/
+src/build/
+
+# ── IP-level sim build outputs (Verilator compiled binaries, objects, headers) ─
+src/*/sim_build/
+src/logical_neuron/sim_build/
+src/neuron_compute/sim_build/
+src/tile/sim_build/
+# Nested test-level sim_build (e.g. src/tile/test/sim_build/)
+src/*/test/sim_build/
+
+# ── IP-level cocotb test results ──────────────────────────────────────────────
+src/*/results.xml
+src/logical_neuron/results.xml
+src/neuron_compute/results.xml
+src/tile/results.xml
+src/*/test/results.xml
+
+# ── Waveform output directories (FST/VCD already excluded above) ──────────────
+**/waves/
+
+# ── Formal verification run outputs (keep *.sby sources; ignore run artifacts) ─
+# Run output subdirectories are named after the target (same stem as the .sby)
+src/*/formal/*/
+src/*/formal/**/
+
+# ── Python cache ──────────────────────────────────────────────────────────────
+**/__pycache__/
+**/*.pyc
+tt.cmd
+tt.ps1
+tt/
+.devcontainer/devcontainer.json
+.devcontainer/devcontainer.json
+src/fusesoc.conf
+.devcontainer/devcontainer.json
+/.devcontainer
+.devcontainer/devcontainer.json
+/.devcontainer
+src/tile/docs/tile_top_architecture.md

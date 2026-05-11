@@ -1,0 +1,52 @@
+[tasks]
+queue_no_overflow            QUEUE_NO_OVERFLOW
+local_enqueue_conservation   LOCAL_ENQUEUE_CONSERVATION
+retry_requires_blocked       RETRY_REQUIRES_BLOCKED
+pending_mask_partition       PENDING_MASK_PARTITION
+retry_no_double_enqueue      RETRY_NO_DOUBLE_ENQUEUE
+no_emit_before_route_loaded  NO_EMIT_BEFORE_ROUTE_LOADED
+
+[options]
+queue_no_overflow:           mode bmc
+queue_no_overflow:           depth 8
+local_enqueue_conservation:  mode bmc
+local_enqueue_conservation:  depth 40
+retry_requires_blocked:      mode bmc
+retry_requires_blocked:      depth 20
+pending_mask_partition:      mode bmc
+pending_mask_partition:      depth 20
+retry_no_double_enqueue:     mode bmc
+retry_no_double_enqueue:     depth 40
+no_emit_before_route_loaded: mode bmc
+no_emit_before_route_loaded: depth 24
+
+[engines]
+smtbmc yices
+
+[script]
+queue_no_overflow:          plugin -i slang
+queue_no_overflow:          read_slang --top tile_fanout_executor_formal --compat-mode -DSYNTHESIS -DFORMAL -DQUEUE_NO_OVERFLOW          tile_pkg.sv rv_if.sv tile_fanout_executor.sv tile_fanout_executor_formal.sv
+queue_no_overflow:          prep -top tile_fanout_executor_formal
+local_enqueue_conservation: plugin -i slang
+local_enqueue_conservation: read_slang --top tile_fanout_executor_formal --compat-mode -DSYNTHESIS -DFORMAL -DLOCAL_ENQUEUE_CONSERVATION tile_pkg.sv rv_if.sv tile_fanout_executor.sv tile_fanout_executor_formal.sv
+local_enqueue_conservation: prep -top tile_fanout_executor_formal
+retry_requires_blocked:     plugin -i slang
+retry_requires_blocked:     read_slang --top tile_fanout_executor_formal --compat-mode -DSYNTHESIS -DFORMAL -DRETRY_REQUIRES_BLOCKED     tile_pkg.sv rv_if.sv tile_fanout_executor.sv tile_fanout_executor_formal.sv
+retry_requires_blocked:     prep -top tile_fanout_executor_formal
+pending_mask_partition:     plugin -i slang
+pending_mask_partition:     read_slang --top tile_fanout_executor_formal --compat-mode -DSYNTHESIS -DFORMAL -DPENDING_MASK_PARTITION     tile_pkg.sv rv_if.sv tile_fanout_executor.sv tile_fanout_executor_formal.sv
+pending_mask_partition:     prep -top tile_fanout_executor_formal
+retry_no_double_enqueue:    plugin -i slang
+retry_no_double_enqueue:    read_slang --top tile_fanout_executor_formal --compat-mode -DSYNTHESIS -DFORMAL -DRETRY_NO_DOUBLE_ENQUEUE    tile_pkg.sv rv_if.sv tile_fanout_executor.sv tile_fanout_executor_formal.sv
+retry_no_double_enqueue:    prep -top tile_fanout_executor_formal
+no_emit_before_route_loaded: plugin -i slang
+no_emit_before_route_loaded: read_slang --top tile_fanout_executor_formal --compat-mode -DSYNTHESIS -DFORMAL -DNO_EMIT_BEFORE_ROUTE_LOADED tile_pkg.sv rv_if.sv tile_fanout_executor.sv tile_fanout_executor_formal.sv
+no_emit_before_route_loaded: prep -top tile_fanout_executor_formal
+
+[files]
+../../../common/packages/tile_pkg.sv
+../../../common/packages/tile_flit_types.vh
+../../../common/interfaces/rv_if.sv
+../src/tile_pkg.svh
+../src/tile_fanout_executor.sv
+tile_fanout_executor_formal.sv

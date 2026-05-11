@@ -1,0 +1,92 @@
+# neuron_compute_core_formal.sby
+#
+# Sequential proofs for neuron_compute_core.
+# DUT: neuron_compute_core_flat (flat-port variant; Yosys-compatible).
+#
+# Tasks:
+#   disabled_idle       -- B1: rst/ena=0 -> outputs quiescent
+#   clear_blocks_start  -- B2: graph_state_clear clears pipeline
+#   zero_len_no_fetch   -- B3: zero-len dispatch never issues ucode_read
+#   zero_len_result     -- B4: zero-len dispatch -> result valid next cycle
+#   result_hold         -- B5: result_valid stable under backpressure
+#   busy_blocks_start   -- B6: busy -> worker_start_ready=0
+#   ucode_payload_id    -- B7: ucode_read logical_idx matches dispatch
+#   ctx_passthrough     -- B8: zero-len result ctx == dispatch ctx
+#   single_step_ldi     -- B9: single-instruction dispatch completes (cover)
+
+[tasks]
+disabled_idle
+clear_blocks_start
+zero_len_no_fetch
+zero_len_result
+result_hold
+busy_blocks_start
+ucode_payload_id
+ctx_passthrough
+single_step_ldi
+
+[options]
+disabled_idle:      mode bmc
+disabled_idle:      depth 6
+
+clear_blocks_start: mode bmc
+clear_blocks_start: depth 6
+
+zero_len_no_fetch:  mode bmc
+zero_len_no_fetch:  depth 6
+
+zero_len_result:    mode bmc
+zero_len_result:    depth 4
+
+result_hold:        mode bmc
+result_hold:        depth 10
+
+busy_blocks_start:  mode bmc
+busy_blocks_start:  depth 8
+
+ucode_payload_id:   mode bmc
+ucode_payload_id:   depth 12
+
+ctx_passthrough:    mode bmc
+ctx_passthrough:    depth 8
+
+single_step_ldi:    mode cover
+single_step_ldi:    depth 15
+
+[engines]
+smtbmc yices
+
+[script]
+disabled_idle:      read_verilog -formal -sv -D FORMAL_DISABLED_IDLE -I . tile_pkg.sv ../src/neuron_exec.sv neuron_compute_core_flat.sv neuron_compute_core_formal.sv
+disabled_idle:      prep -top neuron_compute_core_formal
+
+clear_blocks_start: read_verilog -formal -sv -D FORMAL_CLEAR_BLOCKS_START -I . tile_pkg.sv ../src/neuron_exec.sv neuron_compute_core_flat.sv neuron_compute_core_formal.sv
+clear_blocks_start: prep -top neuron_compute_core_formal
+
+zero_len_no_fetch:  read_verilog -formal -sv -D FORMAL_ZERO_LEN_NO_FETCH -I . tile_pkg.sv ../src/neuron_exec.sv neuron_compute_core_flat.sv neuron_compute_core_formal.sv
+zero_len_no_fetch:  prep -top neuron_compute_core_formal
+
+zero_len_result:    read_verilog -formal -sv -D FORMAL_ZERO_LEN_RESULT -I . tile_pkg.sv ../src/neuron_exec.sv neuron_compute_core_flat.sv neuron_compute_core_formal.sv
+zero_len_result:    prep -top neuron_compute_core_formal
+
+result_hold:        read_verilog -formal -sv -D FORMAL_RESULT_HOLD -I . tile_pkg.sv ../src/neuron_exec.sv neuron_compute_core_flat.sv neuron_compute_core_formal.sv
+result_hold:        prep -top neuron_compute_core_formal
+
+busy_blocks_start:  read_verilog -formal -sv -D FORMAL_BUSY_BLOCKS_START -I . tile_pkg.sv ../src/neuron_exec.sv neuron_compute_core_flat.sv neuron_compute_core_formal.sv
+busy_blocks_start:  prep -top neuron_compute_core_formal
+
+ucode_payload_id:   read_verilog -formal -sv -D FORMAL_UCODE_PAYLOAD_ID -I . tile_pkg.sv ../src/neuron_exec.sv neuron_compute_core_flat.sv neuron_compute_core_formal.sv
+ucode_payload_id:   prep -top neuron_compute_core_formal
+
+ctx_passthrough:    read_verilog -formal -sv -D FORMAL_CTX_PASSTHROUGH -I . tile_pkg.sv ../src/neuron_exec.sv neuron_compute_core_flat.sv neuron_compute_core_formal.sv
+ctx_passthrough:    prep -top neuron_compute_core_formal
+
+single_step_ldi:    read_verilog -formal -sv -D FORMAL_SINGLE_STEP_LDI -I . tile_pkg.sv ../src/neuron_exec.sv neuron_compute_core_flat.sv neuron_compute_core_formal.sv
+single_step_ldi:    prep -top neuron_compute_core_formal
+
+[files]
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../src/neuron_exec.sv
+neuron_compute_core_flat.sv
+neuron_compute_core_formal.sv

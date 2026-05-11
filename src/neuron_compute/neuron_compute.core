@@ -1,0 +1,92 @@
+CAPI=2:
+
+name: coldfoot:ip:neuron_compute:0.1.0
+description: Lightweight shared neuron compute worker core.
+
+filesets:
+  deps:
+    depend:
+      - coldfoot:common:base:0.1.0
+
+  sram_stubs:
+    files:
+      - ../logical_neuron/test/gf180_sram_stubs.sv
+    file_type: systemVerilogSource
+
+  rtl:
+    files:
+      - src/neuron_exec.sv
+      - src/neuron_compute_core.sv
+    file_type: systemVerilogSource
+
+scripts:
+  set_verilator_root:
+    cmd:
+      - python3
+      - ../../../tools/dev/set_verilator_root.py
+
+  flow_sim_neuron_compute_core:
+    cmd:
+      - python3
+      - ../../../tools/dev/flow.py
+      - sim
+      - neuron_compute_core
+      - --sim
+      - verilator
+      - --threads
+      - "14"
+      - --jobs
+      - "14"
+
+targets:
+  default:
+    filesets:
+      - deps
+      - rtl
+    default_tool: verilator
+    toplevel: neuron_compute_core
+
+  lint_neuron_compute:
+    filesets:
+      - deps
+      - sram_stubs
+      - rtl
+    default_tool: verilator
+    toplevel: neuron_compute_core
+    tools:
+      verilator:
+        mode: cc
+        verilator_options:
+          - --lint-only
+
+  sim_neuron_compute:
+    filesets:
+      - deps
+      - sram_stubs
+      - rtl
+    default_tool: verilator
+    toplevel: neuron_compute_core
+    tools:
+      verilator:
+        mode: lint-only
+        verilator_options:
+          - --timing
+          - --assert
+          - -Wall
+          - -Wno-fatal
+          - -Wno-DECLFILENAME
+          - -Wno-UNUSEDPARAM
+          - -Wno-VARHIDDEN
+          - -Wno-WIDTHEXPAND
+    hooks:
+      pre_build:
+        - set_verilator_root
+        - flow_sim_neuron_compute_core
+
+  formal_neuron_compute:
+    filesets:
+      - deps
+      - rtl
+    default_tool: verilator
+    toplevel: neuron_compute_core
+

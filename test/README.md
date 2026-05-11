@@ -1,12 +1,40 @@
-# Sample testbench for a Tiny Tapeout project
+# TT-Boundary Cocotb Testbench — tt_um_neutern_0 (Coldfoot SNN Tile)
 
-This is a sample testbench for a Tiny Tapeout project. It uses [cocotb](https://docs.cocotb.org/en/stable/) to drive the DUT and check the outputs.
-See below to get started or for more information, check the [website](https://tinytapeout.com/hdl/testing/).
+This directory contains the **primary verification testbench** for the `tt_um_neutern_0` TinyTapeout submission.
+It uses [cocotb](https://docs.cocotb.org/en/stable/) with Verilator to exhaustively test the DUT through the TT-standard pin interface.
+
+## Test coverage (`test.py` — 29 tests, all passing)
+
+The testbench exercises the full TT pin interface of the SNN tile:
+
+| Category | Tests | Coverage |
+|---|---|---|
+| Reset & idle | `test_project`, `test_reset_clears_all_outputs`, `test_no_x_propagation_after_reset` | Power-on, `rst_n` de-assertion, all outputs defined |
+| RV-in protocol | `test_rv_in_ready_asserted_at_idle`, `test_no_transfer_without_valid`, `test_single_flit_handshake` | `uio_in[0]`=valid, `uio_out[0]`=ready handshake |
+| Spike ingress | `test_spike_to_all_four_neurons`, `test_spike_neuron_00/10/01/11` | All neuron grid positions |
+| Weight encoding | `test_all_weight_values_accepted`, `test_max_positive_weight`, `test_max_negative_weight`, `test_zero_weight` | Full 4-bit signed weight range |
+| Reserved bits | `test_reserved_bits_ignored`, `test_full_flit_sweep_no_crash` | `ui_in[1:0]` ignored |
+| Back-pressure | `test_rv_out_valid_held_when_ready_0`, `test_rv_out_ready_0_does_not_cause_deadlock` | `uio_in[1]`=ready flow control |
+| Burst / pipeline | `test_back_to_back_flits_same_neuron`, `test_back_to_back_flits_all_neurons`, `test_burst_8_flits_mixed_neurons_weights` | Multi-flit streams |
+| Enable gating | `test_enable_disable_recover`, `test_enable_0_no_output` | `ena` signal gating |
+| Output format | `test_uo_out_format_zero_at_idle`, `test_uo_out_reserved_field_is_zero` | `uo_out[7:0]` payload |
+| FIFO / reset | `test_ingress_backpressure_fills_and_drains`, `test_reset_during_spike_ingress`, `test_rapid_reset_recovery` | Queue fill/drain, mid-transaction reset |
+
+### Pin interface (TT-standard)
+
+| Signal | Description |
+|---|---|
+| `ui_in[7:0]` | Spike flit: `{weight[3:0], 2'b00, neuron_y[0], neuron_x[0]}` |
+| `uio_in[0]` | `rv_in_valid` — host asserts to present a flit |
+| `uio_in[1]` | `rv_out_ready` — host asserts to accept output |
+| `uio_out[0]` | `rv_in_ready` — tile asserts when ingress can accept |
+| `uio_out[1]` | `rv_out_valid` — tile asserts when output is available |
+| `uo_out[7:0]` | `rv_out_payload[7:0]` — output flit byte |
 
 ## Setting up
 
 1. Edit [Makefile](Makefile) and modify `PROJECT_SOURCES` to point to your Verilog files.
-2. Edit [tb.v](tb.v) and replace `tt_um_example` with your module name.
+2. Edit [tb.v](tb.v) and replace `tt_um_neutern_0` if your module name changes.
 
 ## How to run
 

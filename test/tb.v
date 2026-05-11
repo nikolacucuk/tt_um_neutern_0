@@ -6,9 +6,20 @@
 */
 module tb ();
 
-  // Dump the signals to a FST file. You can view it with gtkwave or surfer.
+  // Dump signals to FST.
+  // Default: always writes tb.fst (preserves existing behaviour).
+  // Per-test: invoke with +trace +tracefile=waves/<test>.fst to redirect.
+  // The tracefile path is captured in a module-scope reg to avoid Verilog
+  // variable-in-initial-block compatibility issues across simulators.
+  reg [1023:0] _wave_path;
   initial begin
-    $dumpfile("tb.fst");
+    if ($test$plusargs("trace")) begin
+      if (!$value$plusargs("tracefile=%s", _wave_path))
+        _wave_path = "tb.fst";
+      $dumpfile(_wave_path);
+    end else begin
+      $dumpfile("tb.fst");
+    end
     $dumpvars(0, tb);
     #1;
   end
@@ -27,8 +38,8 @@ module tb ();
   wire VGND = 1'b0;
 `endif
 
-  // Replace tt_um_example with your module name:
-  tt_um_example user_project (
+  // Replace with the project top module name from info.yaml:
+  tt_um_neutern_0 user_project (
 
       // Include power ports for the Gate Level test:
 `ifdef GL_TEST

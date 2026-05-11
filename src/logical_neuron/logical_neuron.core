@@ -1,0 +1,25 @@
+CAPI=2:
+
+name: coldfoot:ip:logical_neuron:0.1.0
+description: Logical neuron state, control, and ucode storage primitives.
+
+filesets:
+  deps:
+    depend:
+      - coldfoot:common:base:0.1.0
+
+  rtl:
+    files:
+      - src/logical_neuron_pkg.sv
+      - src/logical_neuron_context_bank.sv
+      - src/logical_neuron_state_bank.sv
+      - src/logical_neuron_ucode_bank.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+      - deps
+      - rtl
+    default_tool: verilator
+    toplevel: logical_neuron_context_bank

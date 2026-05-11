@@ -1,0 +1,14 @@
+[options]
+mode bmc
+depth 8
+
+[engines]
+smtbmc yices
+
+[script]
+read_verilog -formal -sv logical_neuron_ucode_bank.sv logical_neuron_ucode_bank_formal.sv
+prep -top logical_neuron_ucode_bank_formal
+
+[files]
+../src/logical_neuron_ucode_bank.sv
+logical_neuron_ucode_bank_formal.sv

@@ -1,0 +1,30 @@
+[tasks]
+noc_healthy         NOC_HEALTHY
+arbitrary_nondet
+
+[options]
+noc_healthy:        mode bmc
+noc_healthy:        depth 16
+
+arbitrary_nondet:   mode bmc
+arbitrary_nondet:   depth 16
+
+[engines]
+smtbmc yices
+
+[script]
+noc_healthy:        plugin -i slang
+noc_healthy:        read_slang --top tile_host_io_slot_liveness_formal --compat-mode -DSYNTHESIS -DFORMAL -DNOC_HEALTHY tile_pkg.sv rv_if.sv tile_host_io.sv tile_host_io_slot_liveness_formal.sv
+noc_healthy:        prep -top tile_host_io_slot_liveness_formal
+
+arbitrary_nondet:   plugin -i slang
+arbitrary_nondet:   read_slang --top tile_host_io_slot_liveness_formal --compat-mode -DSYNTHESIS -DFORMAL              tile_pkg.sv rv_if.sv tile_host_io.sv tile_host_io_slot_liveness_formal.sv
+arbitrary_nondet:   prep -top tile_host_io_slot_liveness_formal
+
+[files]
+../../../common/packages/tile_pkg.sv
+../../../common/packages/tile_flit_types.vh
+../../../common/interfaces/rv_if.sv
+../src/tile_pkg.svh
+../src/tile_host_io.sv
+tile_host_io_slot_liveness_formal.sv

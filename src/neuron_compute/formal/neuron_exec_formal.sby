@@ -1,0 +1,92 @@
+# neuron_exec_formal.sby
+#
+# Comprehensive leaf proof for neuron_exec (purely combinational ISA unit).
+# All tasks use bmc depth 1 — one combinational elaboration proves all
+# input combinations.
+#
+# Tasks:
+#   idle_hold      — A1: execute_valid=0 → pass-through all outputs
+#   tag_gate_skip  — A2: tag gate suppresses execution for data events
+#   accum_shadow   — A3: OP_ACCUM_W saturated accumulation correctness
+#   integ_vm       — A4/A5: OP_INTEG vm+accumulator integration + accum clear
+#   spike_flag     — A6: OP_SPIKE_IF_GE threshold comparison
+#   reset_modes    — A7-A9: OP_RESET all four reset modes
+#   emit_one_shot  — A10/A11: OP_EMIT one-shot + data format
+#   ldi_load       — A12: OP_LDI register load and isolation
+#   recv_tag       — A13: OP_RECV tag capture
+
+[tasks]
+idle_hold
+tag_gate_skip
+accum_shadow
+integ_vm
+spike_flag
+reset_modes
+emit_one_shot
+ldi_load
+recv_tag
+
+[options]
+idle_hold:      mode bmc
+idle_hold:      depth 1
+
+tag_gate_skip:  mode bmc
+tag_gate_skip:  depth 1
+
+accum_shadow:   mode bmc
+accum_shadow:   depth 1
+
+integ_vm:       mode bmc
+integ_vm:       depth 1
+
+spike_flag:     mode bmc
+spike_flag:     depth 1
+
+reset_modes:    mode bmc
+reset_modes:    depth 1
+
+emit_one_shot:  mode bmc
+emit_one_shot:  depth 1
+
+ldi_load:       mode bmc
+ldi_load:       depth 1
+
+recv_tag:       mode bmc
+recv_tag:       depth 1
+
+[engines]
+smtbmc yices
+
+[script]
+idle_hold:      read_verilog -formal -sv -D FORMAL_IDLE_HOLD -I . tile_pkg.sv ../src/neuron_exec.sv neuron_exec_formal.sv
+idle_hold:      prep -top neuron_exec_formal
+
+tag_gate_skip:  read_verilog -formal -sv -D FORMAL_TAG_GATE_SKIP -I . tile_pkg.sv ../src/neuron_exec.sv neuron_exec_formal.sv
+tag_gate_skip:  prep -top neuron_exec_formal
+
+accum_shadow:   read_verilog -formal -sv -D FORMAL_ACCUM_SHADOW -I . tile_pkg.sv ../src/neuron_exec.sv neuron_exec_formal.sv
+accum_shadow:   prep -top neuron_exec_formal
+
+integ_vm:       read_verilog -formal -sv -D FORMAL_INTEG_VM -I . tile_pkg.sv ../src/neuron_exec.sv neuron_exec_formal.sv
+integ_vm:       prep -top neuron_exec_formal
+
+spike_flag:     read_verilog -formal -sv -D FORMAL_SPIKE_FLAG -I . tile_pkg.sv ../src/neuron_exec.sv neuron_exec_formal.sv
+spike_flag:     prep -top neuron_exec_formal
+
+reset_modes:    read_verilog -formal -sv -D FORMAL_RESET_MODES -I . tile_pkg.sv ../src/neuron_exec.sv neuron_exec_formal.sv
+reset_modes:    prep -top neuron_exec_formal
+
+emit_one_shot:  read_verilog -formal -sv -D FORMAL_EMIT_ONE_SHOT -I . tile_pkg.sv ../src/neuron_exec.sv neuron_exec_formal.sv
+emit_one_shot:  prep -top neuron_exec_formal
+
+ldi_load:       read_verilog -formal -sv -D FORMAL_LDI_LOAD -I . tile_pkg.sv ../src/neuron_exec.sv neuron_exec_formal.sv
+ldi_load:       prep -top neuron_exec_formal
+
+recv_tag:       read_verilog -formal -sv -D FORMAL_RECV_TAG -I . tile_pkg.sv ../src/neuron_exec.sv neuron_exec_formal.sv
+recv_tag:       prep -top neuron_exec_formal
+
+[files]
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../src/neuron_exec.sv
+neuron_exec_formal.sv

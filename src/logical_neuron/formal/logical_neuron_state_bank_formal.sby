@@ -1,0 +1,42 @@
+[tasks]
+reset_defaults
+ctrl_write
+reset_trigger_drain
+
+[options]
+reset_defaults: mode bmc
+reset_defaults: depth 6
+
+ctrl_write: mode bmc
+ctrl_write: depth 10
+
+reset_trigger_drain: mode bmc
+reset_trigger_drain: depth 16
+
+[engines]
+smtbmc yices
+
+[script]
+# Phase 3 (2026-05): migrated to slang per Phase 1 pattern.
+# logical_neuron_state_bank.sv includes tile_flit_types.vh, which
+# carries a file-scope `import tile_pkg::*;` that yosys's built-in
+# Verilog reader rejects.
+reset_defaults: plugin -i slang
+reset_defaults: read_slang --top logical_neuron_state_bank_formal --compat-mode -DFORMAL_RESET_DEFAULTS tile_pkg.sv logical_neuron_state_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv logical_neuron_state_bank_formal.sv
+reset_defaults: prep -top logical_neuron_state_bank_formal
+
+ctrl_write: plugin -i slang
+ctrl_write: read_slang --top logical_neuron_state_bank_formal --compat-mode -DFORMAL_CTRL_WRITE tile_pkg.sv logical_neuron_state_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv logical_neuron_state_bank_formal.sv
+ctrl_write: prep -top logical_neuron_state_bank_formal
+
+reset_trigger_drain: plugin -i slang
+reset_trigger_drain: read_slang --top logical_neuron_state_bank_formal --compat-mode -DFORMAL_RESET_TRIGGER_DRAIN tile_pkg.sv logical_neuron_state_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv logical_neuron_state_bank_formal.sv
+reset_trigger_drain: prep -top logical_neuron_state_bank_formal
+
+[files]
+../../../common/packages/tile_pkg.sv
+../../../common/packages/tile_flit_types.vh
+../../../common/mem/tile_mem_1r1w_sync.sv
+../../../common/mem/coldfoot_mem_bytelane_sync.sv
+../src/logical_neuron_state_bank.sv
+logical_neuron_state_bank_formal.sv

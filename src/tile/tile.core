@@ -1,0 +1,39 @@
+CAPI=2:
+
+name: coldfoot:ip:tile:0.1.0
+description: Tile-level wrapper hierarchy for Coldfoot mesh nodes.
+
+filesets:
+  deps:
+    depend:
+      - coldfoot:common:base:0.1.0
+      - coldfoot:ip:logical_neuron:0.1.0
+      - coldfoot:ip:neuron_compute:0.1.0
+
+  rtl_includes:
+    files:
+      - src/tile_pkg.svh:
+          is_include_file: true
+    file_type: systemVerilogSource
+
+  rtl:
+    files:
+      - src/tile_event_queue_bank.sv
+      - src/tile_fanout_bank.sv
+      - src/tile_fanout_pool.sv
+      - src/tile_ingress.sv
+      - src/tile_host_io.sv
+      - src/tile_fanout_executor.sv
+      - src/tile_dispatch_scheduler.sv
+      - src/tile_noc_egress.sv
+      - src/tile_top.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+      - deps
+      - rtl_includes
+      - rtl
+    default_tool: verilator
+    toplevel: tile_top

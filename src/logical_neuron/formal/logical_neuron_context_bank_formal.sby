@@ -1,0 +1,59 @@
+# logical_neuron_context_bank_formal.sby
+#
+# Comprehensive formal proof for logical_neuron_context_bank.
+#
+# Tasks:
+#   reset_quiescence  — G1/G2: mem_stall invariant + reset quiescence (bmc, fast)
+#   write_priority    — G3/G4/G6: GSC/soft_reset/commit priority (bmc depth 10)
+#   payload_identity  — G5/G7: commit payload identity + dual-port (prove depth 15)
+#   shadow_prove      — G9: shadow state consistency BMC (depth 8: covers 1 reset + 4 writes + reads)
+#
+
+[tasks]
+reset_quiescence
+write_priority
+payload_identity
+shadow_prove
+
+# ─── Options ──────────────────────────────────────────────────────────────────
+[options]
+reset_quiescence: mode bmc
+reset_quiescence: depth 6
+
+write_priority: mode bmc
+write_priority: depth 6
+
+payload_identity: mode bmc
+payload_identity: depth 6
+
+shadow_prove: mode bmc
+shadow_prove: depth 8
+
+# ─── Engine ───────────────────────────────────────────────────────────────────
+[engines]
+smtbmc yices
+
+# ─── Script ───────────────────────────────────────────────────────────────────
+# Read tile_pkg.sv first so the package is defined before the RTL that
+# includes tile_flit_types.vh (which does `import tile_pkg::*`).
+# -I . makes Yosys search the flat SBY src/ directory for .vh files.
+
+[script]
+reset_quiescence: read_verilog -formal -sv -D FORMAL -I . tile_pkg.sv logical_neuron_context_bank.sv logical_neuron_context_bank_formal.sv
+reset_quiescence: prep -top logical_neuron_context_bank_formal
+
+write_priority: read_verilog -formal -sv -D FORMAL -I . tile_pkg.sv logical_neuron_context_bank.sv logical_neuron_context_bank_formal.sv
+write_priority: prep -top logical_neuron_context_bank_formal
+
+payload_identity: read_verilog -formal -sv -D FORMAL -I . tile_pkg.sv logical_neuron_context_bank.sv logical_neuron_context_bank_formal.sv
+payload_identity: prep -top logical_neuron_context_bank_formal
+
+shadow_prove: read_verilog -formal -sv -D FORMAL -I . tile_pkg.sv logical_neuron_context_bank.sv logical_neuron_context_bank_formal.sv
+shadow_prove: prep -top logical_neuron_context_bank_formal
+
+# ─── Files ────────────────────────────────────────────────────────────────────
+[files]
+../../common/packages/tile_pkg.sv
+../../common/packages/tile_flit_types.vh
+../src/logical_neuron_context_bank.sv
+logical_neuron_context_bank_formal.sv

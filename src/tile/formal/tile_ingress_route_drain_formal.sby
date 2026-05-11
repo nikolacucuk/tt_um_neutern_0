@@ -1,0 +1,22 @@
+[tasks]
+ingress_route_drain
+
+[options]
+ingress_route_drain: mode bmc
+ingress_route_drain: depth 16
+
+[engines]
+ingress_route_drain: smtbmc yices
+
+[script]
+plugin -i slang
+read_slang --top tile_ingress_route_drain_formal --compat-mode -DSYNTHESIS -DFORMAL -DINGRESS_ROUTE_DRAIN tile_pkg.sv rv_if.sv tile_ingress.sv tile_ingress_route_drain_formal.sv
+prep -top tile_ingress_route_drain_formal
+
+[files]
+../../../common/packages/tile_pkg.sv
+../../../common/packages/tile_flit_types.vh
+../../../common/interfaces/rv_if.sv
+../src/tile_pkg.svh
+../src/tile_ingress.sv
+tile_ingress_route_drain_formal.sv
