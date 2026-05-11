@@ -1,90 +1,34 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1778506701" />
-    <testcase name="test_project" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="168" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_reset_clears_all_outputs" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="193" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_no_x_propagation_after_reset" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="214" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_rv_in_ready_asserted_at_idle" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="239" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_no_transfer_without_valid" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="258" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_single_flit_handshake" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="280" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_spike_to_all_four_neurons" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="311" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_spike_neuron_00" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="335" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_spike_neuron_10" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="347" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_spike_neuron_01" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="358" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_spike_neuron_11" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="369" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_all_weight_values_accepted" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="384" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_max_positive_weight" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="406" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_max_negative_weight" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="417" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_zero_weight" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="428" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_reserved_bits_ignored" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="443" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_full_flit_sweep_no_crash" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="472" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_rv_out_valid_held_when_ready_0" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="517" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_rv_out_ready_0_does_not_cause_deadlock" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="566" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_back_to_back_flits_same_neuron" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="609" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_back_to_back_flits_all_neurons" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="630" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_burst_8_flits_mixed_neurons_weights" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="650" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_enable_disable_recover" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="684" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_enable_0_no_output" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="708" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_uo_out_format_zero_at_idle" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="734" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_uo_out_reserved_field_is_zero" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="753" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_ingress_backpressure_fills_and_drains" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="804" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_reset_during_spike_ingress" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="858" time="0" sim_time_ns="0" ratio_time="0">
-      <skipped />
-    </testcase>
-    <testcase name="test_rapid_reset_recovery" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="892" time="0.019409656524658203" sim_time_ns="350000.0" ratio_time="18032261.39294927" />
+    <property name="random_seed" value="1778510844" />
+    <testcase name="test_project" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="168" time="0.018402814865112305" sim_time_ns="150000.0" ratio_time="8150926.969567414" />
+    <testcase name="test_reset_clears_all_outputs" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="193" time="0.003316164016723633" sim_time_ns="200000.0" ratio_time="60310647.78201165" />
+    <testcase name="test_no_x_propagation_after_reset" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="214" time="0.005334377288818359" sim_time_ns="310000.0" ratio_time="58113624.743005276" />
+    <testcase name="test_rv_in_ready_asserted_at_idle" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="239" time="0.0027413368225097656" sim_time_ns="160000.0" ratio_time="58365684.4668638" />
+    <testcase name="test_no_transfer_without_valid" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="258" time="0.004119873046875" sim_time_ns="210000.0" ratio_time="50972444.44444445" />
+    <testcase name="test_single_flit_handshake" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="280" time="0.0022125244140625" sim_time_ns="119999.99999999988" ratio_time="54236689.65517236" />
+    <testcase name="test_spike_to_all_four_neurons" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="311" time="0.0054171085357666016" sim_time_ns="310000.0" ratio_time="57226100.963866025" />
+    <testcase name="test_spike_neuron_00" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="335" time="0.0027985572814941406" sim_time_ns="170000.0" ratio_time="60745585.27858238" />
+    <testcase name="test_spike_neuron_10" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="347" time="0.0030150413513183594" sim_time_ns="170000.0" ratio_time="56383969.63466709" />
+    <testcase name="test_spike_neuron_01" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="358" time="0.002863168716430664" sim_time_ns="170000.0" ratio_time="59374775.58497793" />
+    <testcase name="test_spike_neuron_11" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="369" time="0.002962350845336914" sim_time_ns="169999.99999999977" ratio_time="57386855.53319912" />
+    <testcase name="test_all_weight_values_accepted" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="384" time="0.013633489608764648" sim_time_ns="750000.0" ratio_time="55011594.354965635" />
+    <testcase name="test_max_positive_weight" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="406" time="0.0031630992889404297" sim_time_ns="170000.0" ratio_time="53744756.16190548" />
+    <testcase name="test_max_negative_weight" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="417" time="0.0033431053161621094" sim_time_ns="170000.0" ratio_time="50850925.68820425" />
+    <testcase name="test_zero_weight" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="428" time="0.0028595924377441406" sim_time_ns="170000.0" ratio_time="59449031.182257794" />
+    <testcase name="test_reserved_bits_ignored" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="443" time="0.004479885101318359" sim_time_ns="260000.0" ratio_time="58037202.767429486" />
+    <testcase name="test_full_flit_sweep_no_crash" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="472" time="0.10817646980285645" sim_time_ns="5230000.000000001" ratio_time="48346928.02909252" />
+    <testcase name="test_rv_out_valid_held_when_ready_0" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="517" time="0.006257295608520508" sim_time_ns="320000.0" ratio_time="51140304.05791579" />
+    <testcase name="test_rv_out_ready_0_does_not_cause_deadlock" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="566" time="0.005301952362060547" sim_time_ns="300000.0" ratio_time="56582930.11961507" />
+    <testcase name="test_back_to_back_flits_same_neuron" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="609" time="0.004228115081787109" sim_time_ns="250000.0" ratio_time="59128002.706665166" />
+    <testcase name="test_back_to_back_flits_all_neurons" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="630" time="0.004458427429199219" sim_time_ns="250000.0" ratio_time="56073582.887700535" />
+    <testcase name="test_burst_8_flits_mixed_neurons_weights" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="650" time="0.00663447380065918" sim_time_ns="390000.0" ratio_time="58783863.15449024" />
+    <testcase name="test_enable_disable_recover" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="684" time="0.0033147335052490234" sim_time_ns="210000.0" ratio_time="63353509.31453643" />
+    <testcase name="test_enable_0_no_output" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="708" time="0.003918170928955078" sim_time_ns="210000.0" ratio_time="53596436.65571377" />
+    <testcase name="test_uo_out_format_zero_at_idle" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="734" time="0.005158185958862305" sim_time_ns="260000.0" ratio_time="50405317.30991449" />
+    <testcase name="test_uo_out_reserved_field_is_zero" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="753" time="0.011688709259033203" sim_time_ns="650000.0" ratio_time="55609219.597764455" />
+    <testcase name="test_ingress_backpressure_fills_and_drains" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="804" time="0.006745815277099609" sim_time_ns="360000.0" ratio_time="53366418.3219057" />
+    <testcase name="test_reset_during_spike_ingress" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="858" time="0.004110574722290039" sim_time_ns="220000.0" ratio_time="53520496.4909228" />
+    <testcase name="test_rapid_reset_recovery" classname="test" file="/workspaces/tt_um_neutern_0/test/test.py" lineno="892" time="0.0061740875244140625" sim_time_ns="360000.0" ratio_time="58308211.30676553" />
   </testsuite>
 </testsuites>
