@@ -6,6 +6,8 @@ import tile_pkg::DATA_W;
 import tile_pkg::NEURON_IDX_W;
 import tile_pkg::NEURON_UCODE_REQ_W;
 import tile_pkg::NEURON_UCODE_RSP_W;
+import tile_pkg::NEURON_WORKER_RESULT_W;
+import tile_pkg::NEURON_WORKER_START_W;
 import tile_pkg::PROG_IDX_W;
 import tile_pkg::RF_FLAT_W;
 import tile_pkg::TAG_W;
