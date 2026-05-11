@@ -2,7 +2,13 @@
 # See https://docs.cocotb.org/en/stable/quickstart.html for more info
 
 # defaults
+# Gate-level sim must use icarus: verilator is not available in the GL test
+# workflow and cannot handle sky130 primitive timing delays.
+ifeq ($(GATES),yes)
+SIM    ?= icarus
+else
 SIM    ?= verilator
+endif
 WAVES  ?= 0
 FST    ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
@@ -69,10 +75,14 @@ COMPILE_ARGS 		+= -I$(SRC_DIR)/common/packages
 COMPILE_ARGS 		+= -I$(SRC_DIR)/tile/src
 
 # Verilator-specific: suppress non-fatal warnings; ignore delays in tb
+ifneq ($(SIM),icarus)
 EXTRA_ARGS 			+= -Wno-fatal --no-timing
+endif
 # Waveform tracing: enabled at compile time when WAVES=1
 ifeq ($(WAVES),1)
+ifneq ($(SIM),icarus)
 EXTRA_ARGS += --trace-fst --trace-depth 8
+endif
 endif
 
 # Waveform plusargs: passed to simulator at runtime when WAVES=1
