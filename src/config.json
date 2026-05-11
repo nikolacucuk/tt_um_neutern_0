@@ -13,9 +13,6 @@
     "dir::tt_um_neutern_pkg.sv",
     "dir::common/packages/tile_pkg.sv",
     "dir::common/interfaces/rv_if.sv",
-    "dir::common/interfaces/rv_flit_if.sv",
-    "dir::common/arb/coldfoot_rr_arbiter.sv",
-    "dir::common/mem/tile_mem_1r1w_sync.sv",
     "dir::common/mem/coldfoot_mem_bytelane_sync.sv",
     "dir::logical_neuron/src/logical_neuron_pkg.sv",
     "dir::logical_neuron/src/logical_neuron_context_bank.sv",
@@ -37,7 +34,6 @@
   ],
   "VERILOG_INCLUDE_DIRS": [
     "dir::common/packages",
-    "dir::common/struct",
     "dir::tile/src"
   ],
   "VERILOG_DEFINES": [

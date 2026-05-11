@@ -63,7 +63,6 @@ COMPILE_ARGS		+= -DTILE_ASIC_LEAN
 # Allow sharing configuration between design and testbench via `include`:
 COMPILE_ARGS 		+= -I$(SRC_DIR)
 COMPILE_ARGS 		+= -I$(SRC_DIR)/common/packages
-COMPILE_ARGS 		+= -I$(SRC_DIR)/common/struct
 COMPILE_ARGS 		+= -I$(SRC_DIR)/tile/src
 
 # Verilator-specific: suppress non-fatal warnings; ignore delays in tb

@@ -4,11 +4,6 @@ name: coldfoot:common:base:0.1.0
 description: Shared common interfaces, packages, structs, and RV async library.
 
 filesets:
-  arb:
-    files:
-      - arb/coldfoot_rr_arbiter.sv
-    file_type: systemVerilogSource
-
   # tile_pkg.sv must be compiled before include_headers so that
   # tile_flit_types.vh can `import tile_pkg::*`.
   packages:
@@ -20,49 +15,23 @@ filesets:
     files:
       - packages/tile_flit_types.vh:
           is_include_file: true
-      - packages/packet_builders.vh:
-          is_include_file: true
-      - struct/rv_if_t.vh:
-          is_include_file: true
     file_type: verilogSource
 
   interfaces:
     files:
-      - interfaces/rv_flit_if.sv
       - interfaces/rv_if.sv
-    file_type: systemVerilogSource
-
-  rv_common_sync:
-    files:
-      - rv_lib/rv_fifo.sv
-      - rv_lib/rv_mux.sv
-      - rv_lib/rv_reg_slice.sv
     file_type: systemVerilogSource
 
   mem_common:
     files:
-      - mem/tile_mem_1r1w_sync.sv
       - mem/coldfoot_mem_bytelane_sync.sv
     file_type: systemVerilogSource
 
-  # Stub file retained for historical lint targets; no longer required since
-  # tile_mem_1r1w_sync.sv is FF-only (no SRAM macro paths).
+  # Stub file retained for historical lint targets.
   mem_lint_stubs:
     files:
       - mem/gf180mcu_ocd_sram_lint_stubs.v
     file_type: verilogSource
-
-  rv_common_async:
-    files:
-      - rv_lib/rv_demux_async.sv
-      - rv_lib/rv_depkt_async.sv
-      - rv_lib/rv_fifo_async.sv
-      - rv_lib/rv_mux_async.sv
-      - rv_lib/rv_pkt_async.sv
-      - rv_lib/rv_pkt_mux_async.sv
-      - rv_lib/rv_sw_arb_async.sv
-      - rv_lib/rv_sw_async.sv
-    file_type: systemVerilogSource
 
 scripts:
   set_verilator_root:
@@ -73,16 +42,13 @@ scripts:
 targets:
   default:
     filesets:
-      - arb
       - packages
       - include_headers
       - interfaces
       - mem_common
       - mem_lint_stubs
-      - rv_common_sync
-      - rv_common_async
     default_tool: verilator
-    toplevel: rv_sw_async
+    toplevel: coldfoot_mem_bytelane_sync
     tools:
       verilator:
         mode: lint-only
@@ -101,15 +67,13 @@ targets:
 
   lint_common:
     filesets:
-      - arb
+      - packages
       - include_headers
       - interfaces
       - mem_common
       - mem_lint_stubs
-      - rv_common_sync
-      - rv_common_async
     default_tool: verilator
-    toplevel: rv_sw_async
+    toplevel: coldfoot_mem_bytelane_sync
     tools:
       verilator:
         mode: lint-only

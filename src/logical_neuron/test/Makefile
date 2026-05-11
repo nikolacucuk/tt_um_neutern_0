@@ -15,7 +15,6 @@ VERILOG_SOURCES += $(SRC_DIR)/src/logical_neuron/src/logical_neuron_context_bank
 
 # ── Include paths ─────────────────────────────────────────────────────────────
 COMPILE_ARGS += -I$(SRC_DIR)/src/common/packages
-COMPILE_ARGS += -I$(SRC_DIR)/src/common/struct
 COMPILE_ARGS += -I$(SRC_DIR)/src/tile/src
 
 # ── Top-level parameters ──────────────────────────────────────────────────────

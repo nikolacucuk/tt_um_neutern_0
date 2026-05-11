@@ -22,7 +22,6 @@ VERILOG_SOURCES += $(CURDIR)/neuron_compute_core_tb.sv
 
 # ── Include paths ─────────────────────────────────────────────────────────────
 COMPILE_ARGS   += -I$(SRC_DIR)/src/common/packages
-COMPILE_ARGS   += -I$(SRC_DIR)/src/common/struct
 
 # ── Verilator flags ───────────────────────────────────────────────────────────
 EXTRA_ARGS     += -Wno-fatal --no-timing

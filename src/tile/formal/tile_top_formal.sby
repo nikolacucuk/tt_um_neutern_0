@@ -29,37 +29,37 @@ smtbmc yices
 
 [script]
 reset_quiescence:                   plugin -i slang
-reset_quiescence:                   read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DRESET_QUIESCENCE tile_pkg.sv tile_flit_types.vh rv_if.sv rv_if_t.vh logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv coldfoot_rr_arbiter.sv tile_top.sv tile_top_formal.sv
+reset_quiescence:                   read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DRESET_QUIESCENCE tile_pkg.sv tile_flit_types.vh rv_if.sv logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv coldfoot_mem_bytelane_sync.sv tile_top.sv tile_top_formal.sv
 reset_quiescence:                   setundef -undriven -anyseq
 reset_quiescence:                   clk2fflogic
 reset_quiescence:                   opt_expr
 ena_disabled_no_output:             plugin -i slang
-ena_disabled_no_output:             read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DENA_DISABLED_NO_OUTPUT tile_pkg.sv tile_flit_types.vh rv_if.sv rv_if_t.vh logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv coldfoot_rr_arbiter.sv tile_top.sv tile_top_formal.sv
+ena_disabled_no_output:             read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DENA_DISABLED_NO_OUTPUT tile_pkg.sv tile_flit_types.vh rv_if.sv logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv coldfoot_mem_bytelane_sync.sv tile_top.sv tile_top_formal.sv
 ena_disabled_no_output:             setundef -undriven -anyseq
 ena_disabled_no_output:             clk2fflogic
 ena_disabled_no_output:             opt_expr
 host_priority_mux:                  plugin -i slang
-host_priority_mux:                  read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DHOST_PRIORITY_MUX tile_pkg.sv tile_flit_types.vh rv_if.sv rv_if_t.vh logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv coldfoot_rr_arbiter.sv tile_top.sv tile_top_formal.sv
+host_priority_mux:                  read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DHOST_PRIORITY_MUX tile_pkg.sv tile_flit_types.vh rv_if.sv logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv coldfoot_mem_bytelane_sync.sv tile_top.sv tile_top_formal.sv
 host_priority_mux:                  setundef -undriven -anyseq
 host_priority_mux:                  clk2fflogic
 host_priority_mux:                  opt_expr
 noc_yields_to_host:                 plugin -i slang
-noc_yields_to_host:                 read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DNOC_YIELDS_TO_HOST tile_pkg.sv tile_flit_types.vh rv_if.sv rv_if_t.vh logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv coldfoot_rr_arbiter.sv tile_top.sv tile_top_formal.sv
+noc_yields_to_host:                 read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DNOC_YIELDS_TO_HOST tile_pkg.sv tile_flit_types.vh rv_if.sv logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv coldfoot_mem_bytelane_sync.sv tile_top.sv tile_top_formal.sv
 noc_yields_to_host:                 setundef -undriven -anyseq
 noc_yields_to_host:                 clk2fflogic
 noc_yields_to_host:                 opt_expr
 output_valid_stable_until_ready:    plugin -i slang
-output_valid_stable_until_ready:    read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DOUTPUT_VALID_STABLE_UNTIL_READY tile_pkg.sv tile_flit_types.vh rv_if.sv rv_if_t.vh logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv coldfoot_rr_arbiter.sv tile_top.sv tile_top_formal.sv
+output_valid_stable_until_ready:    read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DOUTPUT_VALID_STABLE_UNTIL_READY tile_pkg.sv tile_flit_types.vh rv_if.sv logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv coldfoot_mem_bytelane_sync.sv tile_top.sv tile_top_formal.sv
 output_valid_stable_until_ready:    setundef -undriven -anyseq
 output_valid_stable_until_ready:    clk2fflogic
 output_valid_stable_until_ready:    opt_expr
 host_payload_stable:                plugin -i slang
-host_payload_stable:                read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DHOST_PAYLOAD_STABLE_ON_BACKPRESSURE tile_pkg.sv tile_flit_types.vh rv_if.sv rv_if_t.vh logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv coldfoot_rr_arbiter.sv tile_top.sv tile_top_formal.sv
+host_payload_stable:                read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DHOST_PAYLOAD_STABLE_ON_BACKPRESSURE tile_pkg.sv tile_flit_types.vh rv_if.sv logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv coldfoot_mem_bytelane_sync.sv tile_top.sv tile_top_formal.sv
 host_payload_stable:                setundef -undriven -anyseq
 host_payload_stable:                clk2fflogic
 host_payload_stable:                opt_expr
 noc_payload_stable:                 plugin -i slang
-noc_payload_stable:                 read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DNOC_PAYLOAD_STABLE_ON_BACKPRESSURE tile_pkg.sv tile_flit_types.vh rv_if.sv rv_if_t.vh logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv tile_mem_1r1w_sync.sv coldfoot_mem_bytelane_sync.sv coldfoot_rr_arbiter.sv tile_top.sv tile_top_formal.sv
+noc_payload_stable:                 read_slang --top tile_top_formal --single-unit -DSYNTHESIS -DFORMAL -DNOC_PAYLOAD_STABLE_ON_BACKPRESSURE tile_pkg.sv tile_flit_types.vh rv_if.sv logical_neuron_pkg.sv neuron_exec.sv neuron_compute_core.sv tile_ingress.sv tile_host_io.sv tile_dispatch_scheduler.sv tile_event_queue_bank.sv tile_fanout_executor.sv tile_fanout_pool.sv tile_fanout_bank.sv tile_noc_egress.sv logical_neuron_context_bank.sv logical_neuron_state_bank.sv logical_neuron_ucode_bank.sv coldfoot_mem_bytelane_sync.sv tile_top.sv tile_top_formal.sv
 noc_payload_stable:                 setundef -undriven -anyseq
 noc_payload_stable:                 clk2fflogic
 noc_payload_stable:                 opt_expr
@@ -68,7 +68,6 @@ noc_payload_stable:                 opt_expr
 ../../common/packages/tile_pkg.sv
 ../../common/packages/tile_flit_types.vh
 ../../common/interfaces/rv_if.sv
-../../common/struct/rv_if_t.vh
 ../../logical_neuron/src/logical_neuron_pkg.sv
 ../../neuron_compute/src/neuron_exec.sv
 ../../neuron_compute/src/neuron_compute_core.sv
@@ -84,9 +83,7 @@ noc_payload_stable:                 opt_expr
 ../../logical_neuron/src/logical_neuron_context_bank.sv
 ../../logical_neuron/src/logical_neuron_state_bank.sv
 ../../logical_neuron/src/logical_neuron_ucode_bank.sv
-../../common/mem/tile_mem_1r1w_sync.sv
 ../../common/mem/coldfoot_mem_bytelane_sync.sv
-../../common/arb/coldfoot_rr_arbiter.sv
 ../src/tile_top.sv
 tile_top_formal.sv
 /workspaces/tt_um_neutern_0/src/tile/formal/tile_top_formal_init.smtc

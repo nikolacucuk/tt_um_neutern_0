@@ -44,7 +44,6 @@ VERILOG_SOURCES = \
 # ── Include paths ─────────────────────────────────────────────────────────────
 COMPILE_ARGS += -I$(SRC_DIR)
 COMPILE_ARGS += -I$(SRC_DIR)/common/packages
-COMPILE_ARGS += -I$(SRC_DIR)/common/struct
 COMPILE_ARGS += -I$(SRC_DIR)/tile/src
 
 # ── Design-time defines ───────────────────────────────────────────────────────
