@@ -3,10 +3,15 @@
 
 # defaults
 SIM    ?= verilator
-# Gate-level sim must use icarus: verilator is not available in the GL test
-# workflow and cannot handle sky130 primitive timing delays.
-ifeq ($(GATES),yes)
+# Auto-fall-back to icarus if verilator is not on PATH (e.g. GL test CI
+# environment which installs iverilog but not verilator). This must happen
+# before cocotb's simulator Makefiles are included, as they check for the
+# binary at parse time — so even `make clean` would crash with SIM=verilator
+# when verilator is absent.
+ifeq ($(SIM),verilator)
+ifeq ($(shell which verilator 2>/dev/null),)
 override SIM := icarus
+endif
 endif
 WAVES  ?= 0
 FST    ?= -fst # Use more efficient FST format
